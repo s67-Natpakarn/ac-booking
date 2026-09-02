@@ -10,10 +10,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "dateId parameter is required" }, { status: 400 });
     }
 
+    // Return ALL time slots for this date with their isBooked status
     const slots = await prisma.timeSlot.findMany({
       where: {
         cleaningDateId: dateId,
-        isBooked: false,
       },
       orderBy: {
         timeSlot: "asc",

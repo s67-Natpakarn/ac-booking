@@ -193,7 +193,9 @@ export default function BookingPage() {
 
       // Immediate reactive update: remove booked room and booked slot from state
       setRooms((prev) => prev.filter((r) => r.id !== selectedRoomId));
-      setSlots((prev) => prev.filter((s) => s.id !== selectedSlotId));
+      setSlots((prev) =>
+        prev.map((s) => (s.id === selectedSlotId ? { ...s, isBooked: true } : s))
+      );
       setSelectedRoomId("");
       setSelectedSlotId("");
       setStaffAssistance(false);
@@ -428,14 +430,36 @@ export default function BookingPage() {
                           Loading open time slots...
                         </div>
                       ) : slots.length === 0 ? (
-                        <div className="p-6 bg-amber-50 border border-amber-200 rounded-2xl text-center text-amber-800 text-sm flex items-center justify-center gap-2">
-                          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-                          <span>No available slots remaining for this date. Please contact administrator.</span>
+                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl text-center text-slate-500 text-sm flex items-center justify-center gap-2">
+                          <AlertTriangle className="w-5 h-5 text-slate-400 shrink-0" />
+                          <span>No time slots configured for this date. Please contact administrator.</span>
                         </div>
                       ) : (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                           {slots.map((slot) => {
                             const isSelected = selectedSlotId === slot.id;
+                            const isBooked = slot.isBooked;
+
+                            if (isBooked) {
+                              return (
+                                <button
+                                  key={slot.id}
+                                  type="button"
+                                  disabled
+                                  className="relative p-3.5 rounded-2xl border text-center flex flex-col items-center justify-center gap-1.5 shadow-2xs bg-slate-100/75 border-slate-200 text-slate-400 cursor-not-allowed select-none"
+                                  title="This time slot has already been booked"
+                                >
+                                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                                    <span className="font-bold text-sm text-slate-400">{slot.timeSlot}</span>
+                                  </div>
+                                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-200 text-slate-500">
+                                    Booked
+                                  </span>
+                                </button>
+                              );
+                            }
+
                             return (
                               <button
                                 key={slot.id}
