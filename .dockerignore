@@ -1,0 +1,11 @@
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+.next
+.git
+.env*.local
+dev.db
+dev.db-journal
+test_download*.xlsx
+exported_schedule.xlsx
