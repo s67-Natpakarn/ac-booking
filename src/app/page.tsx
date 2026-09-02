@@ -407,11 +407,10 @@ export default function BookingPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedFloor("all")}
-                            className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-all ${
-                              selectedFloor === "all"
+                            className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-all ${selectedFloor === "all"
                                 ? "bg-teal-600 text-white border-teal-600 font-bold shadow-sm"
                                 : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                            }`}
+                              }`}
                           >
                             All Floors
                           </button>
@@ -420,11 +419,10 @@ export default function BookingPage() {
                               key={fl}
                               type="button"
                               onClick={() => setSelectedFloor(fl)}
-                              className={`px-3 py-2 text-xs font-semibold rounded-xl border whitespace-nowrap transition-all ${
-                                selectedFloor === fl
+                              className={`px-3 py-2 text-xs font-semibold rounded-xl border whitespace-nowrap transition-all ${selectedFloor === fl
                                   ? "bg-teal-600 text-white border-teal-600 font-bold shadow-sm"
                                   : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                              }`}
+                                }`}
                             >
                               {fl.toLowerCase().includes("floor") ? fl : `Floor ${fl}`}
                             </button>
@@ -444,7 +442,7 @@ export default function BookingPage() {
                         <option value="">-- Choose your room from dropdown ({filteredRooms.length} available) --</option>
                         {filteredRooms.map((room) => (
                           <option key={room.id} value={room.id} className="text-slate-900 py-2">
-                            {room.roomNumber} ({room.floor.toLowerCase().includes("floor") ? room.floor : `Floor ${room.floor}`}) — Scheduled on {room.dateString}
+                            {room.roomNumber} ({room.floor.toLowerCase().includes("floor") ? room.floor : `Floor ${room.floor}`})
                           </option>
                         ))}
                       </select>
@@ -459,9 +457,8 @@ export default function BookingPage() {
 
               {/* STEP 2: DATE & SLOT DISPLAY */}
               <section
-                className={`space-y-4 transition-all duration-300 ${
-                  selectedRoom ? "opacity-100" : "opacity-40 pointer-events-none"
-                }`}
+                className={`space-y-4 transition-all duration-300 ${selectedRoom ? "opacity-100" : "opacity-40 pointer-events-none"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 font-bold flex items-center justify-center text-sm border border-teal-200 shadow-sm">
@@ -582,20 +579,18 @@ export default function BookingPage() {
                                     setConflictAlert(null);
                                   }
                                 }}
-                                className={`relative p-3.5 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center justify-center gap-1 group shadow-sm ${
-                                  isSelected
+                                className={`relative p-3.5 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center justify-center gap-1 group shadow-sm ${isSelected
                                     ? "bg-teal-600 text-white border-teal-600 font-bold shadow-md shadow-teal-600/30 scale-[1.02]"
                                     : "bg-white hover:bg-teal-50/50 text-slate-800 border-slate-200 hover:border-teal-300"
-                                }`}
+                                  }`}
                               >
                                 <div className="flex items-center gap-1.5 text-xs">
                                   <Clock className={`w-3.5 h-3.5 ${isSelected ? "text-white" : "text-teal-600"}`} />
                                   <span className="font-bold text-sm">{slot.timeSlot}</span>
                                 </div>
                                 <span
-                                  className={`text-[11px] ${
-                                    isSelected ? "text-teal-100 font-medium" : "text-slate-500"
-                                  }`}
+                                  className={`text-[11px] ${isSelected ? "text-teal-100 font-medium" : "text-slate-500"
+                                    }`}
                                 >
                                   {isSelected ? "Selected" : "Available"}
                                 </span>
@@ -611,9 +606,8 @@ export default function BookingPage() {
 
               {/* STEP 3: ASSISTANCE INQUIRY */}
               <section
-                className={`space-y-4 transition-all duration-300 ${
-                  selectedSlotId ? "opacity-100" : "opacity-40 pointer-events-none"
-                }`}
+                className={`space-y-4 transition-all duration-300 ${selectedSlotId ? "opacity-100" : "opacity-40 pointer-events-none"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 font-bold flex items-center justify-center text-sm border border-teal-200 shadow-sm">
@@ -634,18 +628,16 @@ export default function BookingPage() {
                   <div
                     onClick={() => setStaffAssistance(false)}
                     id="assistance-no"
-                    className={`cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3.5 shadow-sm ${
-                      !staffAssistance
+                    className={`cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3.5 shadow-sm ${!staffAssistance
                         ? "bg-teal-50/80 border-teal-500 shadow-teal-500/10"
                         : "bg-white border-slate-200 hover:border-slate-300"
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
-                        !staffAssistance
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${!staffAssistance
                           ? "border-teal-600 bg-teal-600 text-white"
                           : "border-slate-300 bg-transparent"
-                      }`}
+                        }`}
                     >
                       {!staffAssistance && <CheckCircle className="w-3.5 h-3.5 fill-current" />}
                     </div>
@@ -666,18 +658,16 @@ export default function BookingPage() {
                   <div
                     onClick={() => setStaffAssistance(true)}
                     id="assistance-yes"
-                    className={`cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3.5 shadow-sm ${
-                      staffAssistance
+                    className={`cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3.5 shadow-sm ${staffAssistance
                         ? "bg-amber-50 border-amber-500 shadow-amber-500/10"
                         : "bg-white border-slate-200 hover:border-slate-300"
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
-                        staffAssistance
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${staffAssistance
                           ? "border-amber-600 bg-amber-600 text-white"
                           : "border-slate-300 bg-transparent"
-                      }`}
+                        }`}
                     >
                       {staffAssistance && <CheckCircle className="w-3.5 h-3.5 fill-current" />}
                     </div>
@@ -708,11 +698,10 @@ export default function BookingPage() {
                   id="confirm-booking-btn"
                   onClick={handleConfirmBooking}
                   disabled={!selectedRoomId || !selectedSlotId || isSubmitting}
-                  className={`w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2.5 shadow-md ${
-                    !selectedRoomId || !selectedSlotId || isSubmitting
+                  className={`w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2.5 shadow-md ${!selectedRoomId || !selectedSlotId || isSubmitting
                       ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
                       : "bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white shadow-teal-600/20 hover:scale-[1.01]"
-                  }`}
+                    }`}
                 >
                   {isSubmitting ? (
                     <>

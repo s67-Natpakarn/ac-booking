@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ShieldCheck, Wind, Sparkles } from "lucide-react";
+import { ShieldCheck, Wind } from "lucide-react";
 
 interface HeaderProps {
   isAdmin?: boolean;
@@ -21,14 +21,9 @@ export default function Header({ isAdmin = false, onLogout, hasActiveSession }: 
             </div>
           </div>
           <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-lg sm:text-xl text-slate-900 tracking-tight group-hover:text-teal-600 transition-colors">
-                BPS AC Cleaning Booking System
-              </span>
-              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200">
-                <Sparkles className="w-2.5 h-2.5" /> bps.acbooking.com
-              </span>
-            </div>
+            <span className="font-bold text-lg sm:text-xl text-slate-900 tracking-tight group-hover:text-teal-600 transition-colors">
+              BPS AC Cleaning Booking System
+            </span>
             <span className="text-xs text-slate-500 font-medium hidden xs:block">
               Institutional AC Maintenance & Service Portal
             </span>
