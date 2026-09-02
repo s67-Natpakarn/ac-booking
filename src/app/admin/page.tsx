@@ -137,7 +137,7 @@ export default function AdminPage() {
   const [editBookingModalOpen, setEditBookingModalOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingRecord | null>(null);
   const [editStaffAssistance, setEditStaffAssistance] = useState(false);
-  const [editTimeString, setEditTimeString] = useState("");
+  const [editSlotId, setEditSlotId] = useState("");
   const [savingBooking, setSavingBooking] = useState(false);
 
   // Delete Booking modal
@@ -149,11 +149,14 @@ export default function AdminPage() {
   const openEditBooking = (b: BookingRecord) => {
     setSelectedBooking(b);
     setEditStaffAssistance(b.staffAssistance);
-    setEditTimeString(b.timeString);
+    const matchedSlot = slots.find(
+      (s: TimeSlotItem) => s.cleaningDate.dateString === b.dateString && s.timeSlot === b.timeString
+    );
+    setEditSlotId(matchedSlot?.id || "");
     setEditBookingModalOpen(true);
   };
 
-  // Save Booking Edit (does not free room or slot)
+  // Save Booking Edit (re-allocates time slot, frees old slot if unused, checks overlap)
   const handleSaveBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedBooking) return;
@@ -164,14 +167,24 @@ export default function AdminPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: selectedBooking.id,
+          timeSlotId: editSlotId,
           staffAssistance: editStaffAssistance,
-          timeString: editTimeString,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to update booking");
 
-      showToast("Booking updated successfully (room & slot remain reserved).", "success");
+      if (data.isOverlapping) {
+        showToast(
+          "Booking updated! Note: Selected time slot overlaps with another room (highlighted in RED).",
+          "info"
+        );
+      } else {
+        showToast(
+          "Booking updated! Previous time slot is now available for other rooms.",
+          "success"
+        );
+      }
       setEditBookingModalOpen(false);
       await fetchAdminData();
     } catch (err: any) {
@@ -524,6 +537,16 @@ export default function AdminPage() {
       showToast(err.message || "Failed to download Excel export.", "error");
     }
   };
+
+  // Overlap Counts: count how many bookings share the same date and time slot
+  const bookingOverlapCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    bookings.forEach((b) => {
+      const key = `${b.dateString}_${b.timeString}`;
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    return counts;
+  }, [bookings]);
 
   // Filtered Bookings
   const filteredBookings = useMemo(() => {
@@ -1001,56 +1024,80 @@ export default function AdminPage() {
                           </td>
                         </tr>
                       ) : (
-                        filteredBookings.map((b) => (
-                          <tr key={b.id} className="hover:bg-slate-50 transition-colors">
-                            <td className="py-3.5 px-4 font-bold text-slate-900">{b.roomNumber}</td>
-                            <td className="py-3.5 px-4 text-slate-600">{b.floor}</td>
-                            <td className="py-3.5 px-4 text-slate-600">
-                              <span className="font-semibold text-slate-900">{b.dateString}</span>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span className="font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200">
-                                {b.timeString}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4">
-                              <span
-                                className={`font-semibold px-2 py-0.5 rounded-full text-[10px] ${
-                                  b.staffAssistance
-                                    ? "bg-amber-100 text-amber-800 border border-amber-300"
-                                    : "bg-slate-100 text-slate-600 border border-slate-200"
-                                }`}
-                              >
-                                {b.staffAssistance ? "YES (Supervised)" : "No"}
-                              </span>
-                            </td>
-                            <td className="py-3.5 px-4 text-slate-500 font-mono text-[11px]">
-                              {new Date(b.createdAt).toLocaleString("en-US", {
-                                timeZone: "Asia/Bangkok",
-                              })}
-                            </td>
-                            <td className="py-3.5 px-4 text-right">
-                              <div className="flex items-center justify-end gap-1.5">
-                                <button
-                                  type="button"
-                                  onClick={() => openEditBooking(b)}
-                                  className="p-1.5 text-slate-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors border border-transparent hover:border-teal-200"
-                                  title="Edit booking details (keeps room reserved)"
+                        filteredBookings.map((b) => {
+                          const isOverlap =
+                            (bookingOverlapCounts[`${b.dateString}_${b.timeString}`] || 0) > 1;
+
+                          return (
+                            <tr
+                              key={b.id}
+                              className={`transition-colors ${
+                                isOverlap
+                                  ? "bg-rose-50/50 hover:bg-rose-50/80 border-l-4 border-l-rose-500"
+                                  : "hover:bg-slate-50"
+                              }`}
+                            >
+                              <td className="py-3.5 px-4 font-bold text-slate-900">
+                                {b.roomNumber}
+                              </td>
+                              <td className="py-3.5 px-4 text-slate-600">{b.floor}</td>
+                              <td className="py-3.5 px-4 text-slate-600">
+                                <span className="font-semibold text-slate-900">{b.dateString}</span>
+                              </td>
+                              <td className="py-3.5 px-4">
+                                {isOverlap ? (
+                                  <span className="inline-flex items-center gap-1.5 font-bold text-rose-700 bg-rose-100/90 px-2.5 py-1 rounded-lg border border-rose-300 shadow-xs">
+                                    <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                                    <span>{b.timeString}</span>
+                                    <span className="text-[9px] font-black uppercase tracking-wider bg-rose-600 text-white px-1.5 py-0.5 rounded">
+                                      Overlap / ทับซ้อน
+                                    </span>
+                                  </span>
+                                ) : (
+                                  <span className="font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200">
+                                    {b.timeString}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-3.5 px-4">
+                                <span
+                                  className={`font-semibold px-2 py-0.5 rounded-full text-[10px] ${
+                                    b.staffAssistance
+                                      ? "bg-amber-100 text-amber-800 border border-amber-300"
+                                      : "bg-slate-100 text-slate-600 border border-slate-200"
+                                  }`}
                                 >
-                                  <Edit2 className="w-3.5 h-3.5" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => openDeleteBooking(b)}
-                                  className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-200"
-                                  title="Cancel booking (releases room & time slot back to available)"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
+                                  {b.staffAssistance ? "YES (Supervised)" : "No"}
+                                </span>
+                              </td>
+                              <td className="py-3.5 px-4 text-slate-500 font-mono text-[11px]">
+                                {new Date(b.createdAt).toLocaleString("en-US", {
+                                  timeZone: "Asia/Bangkok",
+                                })}
+                              </td>
+                              <td className="py-3.5 px-4 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => openEditBooking(b)}
+                                    className="p-1.5 text-slate-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors border border-transparent hover:border-teal-200"
+                                    title="Edit time slot or assistance"
+                                  >
+                                    <Edit2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => openDeleteBooking(b)}
+                                    className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-200"
+                                    title="Cancel booking (releases room & time slot back to available)"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
                       )}
                     </tbody>
                   </table>
@@ -1465,24 +1512,76 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-2xl text-[11px] text-amber-800 leading-relaxed">
-              <span className="font-bold">Note:</span> Editing these details updates the confirmed record. It does <strong>not</strong> change the availability of the room or slot (both remain booked).
+            <div className="mt-3 p-3 bg-teal-50 border border-teal-200 rounded-2xl text-[11px] text-teal-900 leading-relaxed">
+              <span className="font-bold">Slot Re-allocation Rule:</span> When you select a new time slot below, the previous slot (<strong className="text-teal-950">{selectedBooking.timeString}</strong>) will automatically be freed up for other residents to choose.
             </div>
 
             <form onSubmit={handleSaveBooking} className="mt-4 space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Time Slot Display
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Select Time Slot ({selectedBooking.dateString})
                 </label>
-                <input
-                  type="text"
+                <select
+                  value={editSlotId}
+                  onChange={(e) => setEditSlotId(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-teal-500 rounded-xl px-3.5 py-2.5 text-xs text-slate-900 focus:outline-none"
                   required
-                  value={editTimeString}
-                  onChange={(e) => setEditTimeString(e.target.value)}
-                  placeholder="e.g. 09:30"
-                  className="w-full bg-slate-50 border border-slate-200 focus:border-teal-500 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none"
-                />
+                >
+                  {slots
+                    .filter((s: TimeSlotItem) => s.cleaningDate.dateString === selectedBooking.dateString)
+                    .map((s: TimeSlotItem) => {
+                      const otherRooms = bookings.filter(
+                        (b) =>
+                          b.id !== selectedBooking.id &&
+                          b.dateString === selectedBooking.dateString &&
+                          b.timeString === s.timeSlot
+                      );
+                      const isOccupied = otherRooms.length > 0;
+                      const isCurrent = s.timeSlot === selectedBooking.timeString;
+
+                      let label = s.timeSlot;
+                      if (isCurrent) {
+                        label += " (Current Slot)";
+                      } else if (isOccupied) {
+                        label += ` ⚠️ (Booked by Room ${otherRooms.map((r) => r.roomNumber).join(", ")} - Overlap / เวลาจะทับซ้อน)`;
+                      } else {
+                        label += " (Available / ว่าง)";
+                      }
+
+                      return (
+                        <option key={s.id} value={s.id}>
+                          {label}
+                        </option>
+                      );
+                    })}
+                </select>
               </div>
+
+              {/* OVERLAP WARNING BANNER */}
+              {(() => {
+                const targetSlot = slots.find((s: TimeSlotItem) => s.id === editSlotId);
+                const otherRooms = targetSlot
+                  ? bookings.filter(
+                      (b) =>
+                        b.id !== selectedBooking.id &&
+                        b.dateString === selectedBooking.dateString &&
+                        b.timeString === targetSlot.timeSlot
+                    )
+                  : [];
+
+                if (otherRooms.length > 0) {
+                  return (
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-[11px] text-rose-800 leading-relaxed animate-in fade-in duration-150">
+                      <div className="flex items-center gap-1.5 font-bold text-rose-900 mb-0.5">
+                        <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                        <span>Overlapping Time Slot Notice (เวลาทับซ้อน)</span>
+                      </div>
+                      Slot <strong className="text-rose-950">{targetSlot?.timeSlot}</strong> is already booked by <strong>Room {otherRooms.map((r) => r.roomNumber).join(", ")}</strong>. You can still save it; both rooms will share this time slot and will be highlighted in <strong className="text-rose-900">RED</strong> on the website and in Excel.
+                    </div>
+                  );
+                }
+                return null;
+              })()}
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-2">

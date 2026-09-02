@@ -497,6 +497,14 @@ export async function generateMultiSheetExport(sheets: ExportDateSheet[]): Promi
       emptyRow.values = ["-", "No rooms or bookings recorded for this date", "-", "-", "-", "-"];
       emptyRow.alignment = { vertical: "middle", horizontal: "center" };
     } else {
+      // Count frequency of each confirmed timeSlot on this sheet to detect overlaps
+      const slotCounts: Record<string, number> = {};
+      sheet.rows.forEach((r) => {
+        if (r.status === "CONFIRMED" && r.timeSlot && r.timeSlot !== "-") {
+          slotCounts[r.timeSlot] = (slotCounts[r.timeSlot] || 0) + 1;
+        }
+      });
+
       // Sort rows: first by time slot, then by floor/room
       const sorted = [...sheet.rows].sort((a, b) => {
         const timeCmp = (a.timeSlot || "").localeCompare(b.timeSlot || "");
@@ -507,19 +515,38 @@ export async function generateMultiSheetExport(sheets: ExportDateSheet[]): Promi
       let rIdx = 4;
       for (const item of sorted) {
         const row = worksheet.getRow(rIdx);
+        const isOverlap = item.status === "CONFIRMED" && (slotCounts[item.timeSlot] || 0) > 1;
+        const displaySlot = isOverlap
+          ? `${item.timeSlot} ⚠️ (Overlap / ทับซ้อน)`
+          : item.timeSlot || "Pending";
+        const displayStatus = isOverlap ? "CONFIRMED (OVERLAP)" : item.status;
+
         row.values = [
           item.floor,
           item.roomNumber,
-          item.timeSlot || "Pending",
-          item.status,
+          displaySlot,
+          displayStatus,
           item.staffAssistance,
           item.bookingTimestamp,
         ];
         row.alignment = { vertical: "middle", horizontal: "center" };
         row.font = { name: "Arial", size: 10 };
 
-        // Highlight confirmed vs available
-        if (item.status === "CONFIRMED") {
+        // Highlight overlapping vs confirmed vs available
+        if (isOverlap) {
+          row.getCell(3).font = { bold: true, color: { argb: "FFB91C1C" } }; // Red 700
+          row.getCell(3).fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFEE2E2" }, // Red 100
+          };
+          row.getCell(4).font = { bold: true, color: { argb: "FFB91C1C" } }; // Red 700
+          row.getCell(4).fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFEE2E2" }, // Red 100
+          };
+        } else if (item.status === "CONFIRMED") {
           row.getCell(4).font = { bold: true, color: { argb: "FF047857" } }; // Emerald 700
           row.getCell(4).fill = {
             type: "pattern",
@@ -549,7 +576,7 @@ export async function generateMultiSheetExport(sheets: ExportDateSheet[]): Promi
           };
         });
 
-        row.height = 20;
+        row.height = 22;
         rIdx++;
       }
     }
@@ -558,8 +585,8 @@ export async function generateMultiSheetExport(sheets: ExportDateSheet[]): Promi
     worksheet.columns = [
       { width: 12 }, // Floor
       { width: 18 }, // Room Number
-      { width: 15 }, // Time Slot
-      { width: 18 }, // Booking Status
+      { width: 26 }, // Time Slot
+      { width: 24 }, // Booking Status
       { width: 28 }, // Staff Assistance Required
       { width: 26 }, // Booking Timestamp
     ];

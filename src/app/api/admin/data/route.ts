@@ -33,7 +33,7 @@ export async function GET() {
     const timeSlots = await prisma.timeSlot.findMany({
       include: {
         cleaningDate: true,
-        booking: true,
+        bookings: true,
       },
       orderBy: [{ cleaningDateId: "asc" }, { timeSlot: "asc" }],
     });

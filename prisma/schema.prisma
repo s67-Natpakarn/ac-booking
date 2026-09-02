@@ -44,7 +44,7 @@ model TimeSlot {
   cleaningDate   CleaningDate @relation(fields: [cleaningDateId], references: [id], onDelete: Cascade)
   timeSlot       String       // e.g. "09:30"
   isBooked       Boolean      @default(false)
-  booking        Booking?
+  bookings       Booking[]
   createdAt      DateTime     @default(now())
 
   @@unique([cleaningDateId, timeSlot])
@@ -54,7 +54,7 @@ model Booking {
   id              String   @id @default(cuid())
   roomId          String   @unique
   room            Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  timeSlotId      String   @unique
+  timeSlotId      String
   timeSlot        TimeSlot @relation(fields: [timeSlotId], references: [id], onDelete: Cascade)
   roomNumber      String
   floor           String
