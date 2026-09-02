@@ -187,13 +187,12 @@ export function parseDateHeader(val: any): { dateString: string; displayDate: st
 
   if (!date || isNaN(date.getTime())) return null;
 
-  // Use UTC to prevent local timezone shifts
-  const y = date.getUTCFullYear();
+  // Enforce year 2026 and format as DD MMM 2026 (e.g. "07 Sep 2026" - no Sunday/Monday)
+  const y = 2026;
   const m = String(date.getUTCMonth() + 1).padStart(2, "0");
   const d = String(date.getUTCDate()).padStart(2, "0");
-  const dateString = `${y}-${m}-${d}`;
+  const dateString = `2026-${m}-${d}`;
 
-  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const monthNames = [
     "Jan",
     "Feb",
@@ -208,9 +207,8 @@ export function parseDateHeader(val: any): { dateString: string; displayDate: st
     "Nov",
     "Dec",
   ];
-  const dayName = dayNames[date.getUTCDay()];
   const monthName = monthNames[date.getUTCMonth()];
-  const displayDate = `${dayName}, ${monthName} ${d}, ${y}`;
+  const displayDate = `${d} ${monthName} 2026`;
 
   return { dateString, displayDate };
 }
