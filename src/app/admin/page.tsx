@@ -133,6 +133,85 @@ export default function AdminPage() {
   const [resetConfirmationText, setResetConfirmationText] = useState("");
   const [resetting, setResetting] = useState(false);
 
+  // Edit Booking modal
+  const [editBookingModalOpen, setEditBookingModalOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<BookingRecord | null>(null);
+  const [editStaffAssistance, setEditStaffAssistance] = useState(false);
+  const [editTimeString, setEditTimeString] = useState("");
+  const [savingBooking, setSavingBooking] = useState(false);
+
+  // Delete Booking modal
+  const [deleteBookingModalOpen, setDeleteBookingModalOpen] = useState(false);
+  const [bookingToDelete, setBookingToDelete] = useState<BookingRecord | null>(null);
+  const [deletingBooking, setDeletingBooking] = useState(false);
+
+  // Open Edit Booking Modal
+  const openEditBooking = (b: BookingRecord) => {
+    setSelectedBooking(b);
+    setEditStaffAssistance(b.staffAssistance);
+    setEditTimeString(b.timeString);
+    setEditBookingModalOpen(true);
+  };
+
+  // Save Booking Edit (does not free room or slot)
+  const handleSaveBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedBooking) return;
+    try {
+      setSavingBooking(true);
+      const res = await fetch("/api/admin/bookings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: selectedBooking.id,
+          staffAssistance: editStaffAssistance,
+          timeString: editTimeString,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update booking");
+
+      showToast("Booking updated successfully (room & slot remain reserved).", "success");
+      setEditBookingModalOpen(false);
+      await fetchAdminData();
+    } catch (err: any) {
+      showToast(err.message || "Error updating booking", "error");
+    } finally {
+      setSavingBooking(false);
+    }
+  };
+
+  // Open Delete Booking Modal
+  const openDeleteBooking = (b: BookingRecord) => {
+    setBookingToDelete(b);
+    setDeleteBookingModalOpen(true);
+  };
+
+  // Confirm Delete Booking (frees both room and slot)
+  const handleConfirmDeleteBooking = async () => {
+    if (!bookingToDelete) return;
+    try {
+      setDeletingBooking(true);
+      const res = await fetch(`/api/admin/bookings?id=${bookingToDelete.id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete booking");
+
+      showToast(
+        `Booking for room ${bookingToDelete.roomNumber} deleted. Room and time slot are now available again!`,
+        "success"
+      );
+      setDeleteBookingModalOpen(false);
+      setBookingToDelete(null);
+      await fetchAdminData();
+    } catch (err: any) {
+      showToast(err.message || "Error deleting booking", "error");
+    } finally {
+      setDeletingBooking(false);
+    }
+  };
+
   // Check auth on mount
   const checkAuth = async () => {
     try {
@@ -911,12 +990,13 @@ export default function AdminPage() {
                         <th className="py-3.5 px-4">Time Slot</th>
                         <th className="py-3.5 px-4">Staff Assistance Required</th>
                         <th className="py-3.5 px-4">Booking Timestamp</th>
+                        <th className="py-3.5 px-4 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {filteredBookings.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="py-12 text-center text-slate-400">
+                          <td colSpan={7} className="py-12 text-center text-slate-400">
                             No bookings recorded yet.
                           </td>
                         </tr>
@@ -948,6 +1028,26 @@ export default function AdminPage() {
                               {new Date(b.createdAt).toLocaleString("en-US", {
                                 timeZone: "Asia/Bangkok",
                               })}
+                            </td>
+                            <td className="py-3.5 px-4 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => openEditBooking(b)}
+                                  className="p-1.5 text-slate-500 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors border border-transparent hover:border-teal-200"
+                                  title="Edit booking details (keeps room reserved)"
+                                >
+                                  <Edit2 className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => openDeleteBooking(b)}
+                                  className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-200"
+                                  title="Cancel booking (releases room & time slot back to available)"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -1339,6 +1439,149 @@ export default function AdminPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT BOOKING MODAL */}
+      {editBookingModalOpen && selectedBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-md shadow-xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Edit Booking — Room {selectedBooking.roomNumber}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Floor {selectedBooking.floor} • Cleaning Date: {selectedBooking.dateString}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditBookingModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-2xl text-[11px] text-amber-800 leading-relaxed">
+              <span className="font-bold">Note:</span> Editing these details updates the confirmed record. It does <strong>not</strong> change the availability of the room or slot (both remain booked).
+            </div>
+
+            <form onSubmit={handleSaveBooking} className="mt-4 space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Time Slot Display
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editTimeString}
+                  onChange={(e) => setEditTimeString(e.target.value)}
+                  placeholder="e.g. 09:30"
+                  className="w-full bg-slate-50 border border-slate-200 focus:border-teal-500 rounded-xl px-3.5 py-2 text-xs text-slate-900 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">
+                  Staff Assistance Required
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditStaffAssistance(false)}
+                    className={`py-2 px-3 rounded-xl text-xs font-medium border text-center transition-all ${
+                      !editStaffAssistance
+                        ? "bg-slate-900 text-white border-slate-900 shadow-xs"
+                        : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    No (Self-Access)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEditStaffAssistance(true)}
+                    className={`py-2 px-3 rounded-xl text-xs font-medium border text-center transition-all ${
+                      editStaffAssistance
+                        ? "bg-amber-600 text-white border-amber-600 shadow-xs"
+                        : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                    }`}
+                  >
+                    YES (Supervised)
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditBookingModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 border border-slate-200"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingBooking}
+                  className="flex-1 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold shadow-md shadow-teal-600/20 flex items-center justify-center gap-1.5"
+                >
+                  {savingBooking && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* DELETE BOOKING CONFIRMATION MODAL */}
+      {deleteBookingModalOpen && bookingToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 w-full max-w-md shadow-xl animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+              <div className="w-10 h-10 rounded-2xl bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-600 shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  Delete & Cancel Booking
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Room {bookingToDelete.roomNumber} • {bookingToDelete.dateString}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Are you sure you want to delete the booking for <strong className="text-slate-900">Room {bookingToDelete.roomNumber}</strong> at <strong className="text-slate-900">{bookingToDelete.timeString}</strong>?
+              </p>
+
+              <div className="p-3 bg-teal-50 border border-teal-200 rounded-2xl text-[11px] text-teal-900 leading-relaxed">
+                <span className="font-bold">Important:</span> Deleting this booking will immediately cancel the reservation. Both <strong>Room {bookingToDelete.roomNumber}</strong> and time slot <strong>{bookingToDelete.timeString}</strong> will become chooseable and available again for residents to book.
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-4 border-t border-slate-100 mt-4">
+              <button
+                type="button"
+                onClick={() => setDeleteBookingModalOpen(false)}
+                className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 border border-slate-200"
+              >
+                Keep Booking
+              </button>
+              <button
+                type="button"
+                disabled={deletingBooking}
+                onClick={handleConfirmDeleteBooking}
+                className="flex-1 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md shadow-rose-600/20 flex items-center justify-center gap-1.5"
+              >
+                {deletingBooking && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>Delete & Release Room</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
