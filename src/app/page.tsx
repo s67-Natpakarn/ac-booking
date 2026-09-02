@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import Header from "@/components/Header";
 import BookingReceiptModal from "@/components/BookingReceiptModal";
 import { useToast } from "@/components/ToastContext";
@@ -16,6 +16,7 @@ import {
   Loader2,
   Building,
   RefreshCw,
+  X,
 } from "lucide-react";
 
 interface AvailableRoom {
@@ -66,6 +67,13 @@ export default function BookingPage() {
 
   // Receipt Modal State
   const [receipt, setReceipt] = useState<ConfirmedBooking | null>(null);
+
+  // Conflict Alert State (for concurrent race conditions)
+  const [conflictAlert, setConflictAlert] = useState<{
+    type: "SLOT" | "ROOM";
+    message: string;
+    item: string;
+  } | null>(null);
 
   // Fetch initial session status
   const checkSession = async () => {
@@ -127,19 +135,12 @@ export default function BookingPage() {
     });
   }, [rooms, roomSearchQuery, selectedFloor]);
 
-  // When room changes, fetch slots for its assigned date
-  useEffect(() => {
-    if (!selectedRoom) {
-      setSlots([]);
-      setSelectedSlotId("");
-      return;
-    }
-
-    const fetchSlotsForDate = async () => {
+  // Fetch slots for a date
+  const fetchSlotsForDate = useCallback(
+    async (dateId: string) => {
       try {
         setLoadingSlots(true);
-        setSelectedSlotId("");
-        const res = await fetch(`/api/booking/slots?dateId=${selectedRoom.cleaningDateId}`);
+        const res = await fetch(`/api/booking/slots?dateId=${dateId}`);
         const data = await res.json();
 
         if (data.slots) {
@@ -153,10 +154,21 @@ export default function BookingPage() {
       } finally {
         setLoadingSlots(false);
       }
-    };
+    },
+    [showToast]
+  );
 
-    fetchSlotsForDate();
-  }, [selectedRoom, showToast]);
+  // When room changes, fetch slots for its assigned date
+  useEffect(() => {
+    if (!selectedRoom) {
+      setSlots([]);
+      setSelectedSlotId("");
+      return;
+    }
+
+    setSelectedSlotId("");
+    fetchSlotsForDate(selectedRoom.cleaningDateId);
+  }, [selectedRoom, fetchSlotsForDate]);
 
   // Handle Booking Submission
   const handleConfirmBooking = async () => {
@@ -184,10 +196,50 @@ export default function BookingPage() {
       const data = await res.json();
 
       if (!res.ok) {
+        // Handle race conditions where another user booked at the same exact time
+        if (res.status === 409 || data.conflictType) {
+          if (data.conflictType === "SLOT_CONFLICT") {
+            const slotName = data.conflictItem || "selected";
+            setConflictAlert({
+              type: "SLOT",
+              message: `Time slot ${slotName} was just confirmed by another resident a moment ago.`,
+              item: slotName,
+            });
+
+            // Automatically re-fetch slots so the conflicting slot turns into "Booked" immediately in UI
+            if (selectedRoom) {
+              await fetchSlotsForDate(selectedRoom.cleaningDateId);
+            }
+            setSelectedSlotId("");
+            showToast(
+              `Notice: Time slot ${slotName} was just booked by another resident. Please choose an alternative available time slot.`,
+              "error"
+            );
+            return;
+          } else if (data.conflictType === "ROOM_CONFLICT") {
+            const roomName = data.conflictItem || "selected";
+            setConflictAlert({
+              type: "ROOM",
+              message: `Room ${roomName} was just confirmed by another resident a moment ago.`,
+              item: roomName,
+            });
+
+            await fetchRooms();
+            setSelectedRoomId("");
+            setSelectedSlotId("");
+            showToast(
+              `Notice: Room ${roomName} was just booked by another resident. Please choose another available room.`,
+              "error"
+            );
+            return;
+          }
+        }
+
         throw new Error(data.error || "Failed to confirm booking.");
       }
 
-      // Show receipt modal
+      // Success
+      setConflictAlert(null);
       setReceipt(data.booking);
       showToast("Booking confirmed successfully!", "success");
 
@@ -201,7 +253,6 @@ export default function BookingPage() {
       setStaffAssistance(false);
     } catch (err: any) {
       showToast(err.message || "Something went wrong while confirming booking.", "error");
-      // Refresh current rooms and slots in case another user booked it
       fetchRooms();
     } finally {
       setIsSubmitting(false);
@@ -300,6 +351,36 @@ export default function BookingPage() {
                     </p>
                   </div>
                 </div>
+
+                {/* ROOM CONFLICT ALERT BANNER */}
+                {conflictAlert && conflictAlert.type === "ROOM" && (
+                  <div className="p-4.5 bg-rose-50 border-2 border-rose-400 rounded-2xl shadow-md flex items-start gap-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="w-10 h-10 rounded-xl bg-rose-100 border border-rose-300 flex items-center justify-center text-rose-600 shrink-0 mt-0.5">
+                      <AlertTriangle className="w-5 h-5 text-rose-600 animate-pulse" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-sm font-black text-rose-950 flex items-center gap-1.5">
+                          ⚠️ Room Conflict: Room Just Booked by Another Resident!
+                        </h4>
+                        <button
+                          type="button"
+                          onClick={() => setConflictAlert(null)}
+                          className="text-rose-400 hover:text-rose-700 p-1 rounded-lg transition-colors"
+                          title="Dismiss notice"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-rose-800 leading-relaxed mt-1">
+                        Room <strong className="text-rose-950 font-bold bg-rose-200/80 px-2 py-0.5 rounded border border-rose-300">{conflictAlert.item}</strong> was confirmed by another resident just moments before you submitted.
+                      </p>
+                      <div className="mt-2.5 inline-flex items-center gap-2 bg-rose-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl shadow-xs">
+                        <span>👉 Please choose another available room from the list below:</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {rooms.length === 0 ? (
                   <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 text-center text-slate-500 text-sm">
@@ -418,6 +499,36 @@ export default function BookingPage() {
                       </div>
                     </div>
 
+                    {/* TIME SLOT CONFLICT ALERT BANNER */}
+                    {conflictAlert && conflictAlert.type === "SLOT" && (
+                      <div className="p-4.5 bg-rose-50 border-2 border-rose-400 rounded-2xl shadow-md flex items-start gap-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="w-10 h-10 rounded-xl bg-rose-100 border border-rose-300 flex items-center justify-center text-rose-600 shrink-0 mt-0.5">
+                          <AlertTriangle className="w-5 h-5 text-rose-600 animate-pulse" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-sm font-black text-rose-950 flex items-center gap-1.5">
+                              ⚠️ Time Slot Conflict: Slot Just Booked by Another Resident!
+                            </h4>
+                            <button
+                              type="button"
+                              onClick={() => setConflictAlert(null)}
+                              className="text-rose-400 hover:text-rose-700 p-1 rounded-lg transition-colors"
+                              title="Dismiss notice"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <p className="text-xs text-rose-800 leading-relaxed mt-1">
+                            The time slot <strong className="text-rose-950 font-bold bg-rose-200/80 px-2 py-0.5 rounded border border-rose-300">{conflictAlert.item}</strong> you selected was confirmed by another resident just moments before you submitted.
+                          </p>
+                          <div className="mt-2.5 inline-flex items-center gap-2 bg-rose-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl shadow-xs">
+                            <span>👉 Please choose an alternative available time slot from the updated list below:</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Time Slots Grid */}
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-700 block">
@@ -465,7 +576,12 @@ export default function BookingPage() {
                                 key={slot.id}
                                 type="button"
                                 id={`slot-btn-${slot.id}`}
-                                onClick={() => setSelectedSlotId(slot.id)}
+                                onClick={() => {
+                                  setSelectedSlotId(slot.id);
+                                  if (conflictAlert?.type === "SLOT") {
+                                    setConflictAlert(null);
+                                  }
+                                }}
                                 className={`relative p-3.5 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center justify-center gap-1 group shadow-sm ${
                                   isSelected
                                     ? "bg-teal-600 text-white border-teal-600 font-bold shadow-md shadow-teal-600/30 scale-[1.02]"

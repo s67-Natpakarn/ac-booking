@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+class BookingConflictError extends Error {
+  conflictType: "SLOT_CONFLICT" | "ROOM_CONFLICT";
+  conflictItem: string;
+
+  constructor(message: string, conflictType: "SLOT_CONFLICT" | "ROOM_CONFLICT", conflictItem: string) {
+    super(message);
+    this.name = "BookingConflictError";
+    this.conflictType = conflictType;
+    this.conflictItem = conflictItem;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -13,7 +25,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Atomic transaction
+    // Atomic transaction to ensure concurrency safety
     const booking = await prisma.$transaction(async (tx) => {
       // 1. Check room
       const room = await tx.room.findUnique({
@@ -25,7 +37,11 @@ export async function POST(request: NextRequest) {
         throw new Error("The selected room could not be found.");
       }
       if (room.isBooked) {
-        throw new Error("This room has already been booked. Please choose another room.");
+        throw new BookingConflictError(
+          `Room ${room.roomNumber} was just confirmed by another resident a moment ago. Please select another room.`,
+          "ROOM_CONFLICT",
+          room.roomNumber
+        );
       }
 
       // 2. Check timeSlot
@@ -37,7 +53,11 @@ export async function POST(request: NextRequest) {
         throw new Error("The selected time slot could not be found.");
       }
       if (slot.isBooked) {
-        throw new Error("This time slot has already been booked. Please pick an alternative time slot.");
+        throw new BookingConflictError(
+          `Time slot ${slot.timeSlot} was just booked by another resident a moment ago. Please select an alternative available time slot below.`,
+          "SLOT_CONFLICT",
+          slot.timeSlot
+        );
       }
 
       // Ensure slot belongs to the room's assigned date
@@ -93,6 +113,19 @@ export async function POST(request: NextRequest) {
     });
   } catch (error: any) {
     console.error("Booking confirmation error:", error);
+
+    // Return structured 409 Conflict for concurrent race conditions
+    if (error?.name === "BookingConflictError") {
+      return NextResponse.json(
+        {
+          error: error.message,
+          conflictType: error.conflictType,
+          conflictItem: error.conflictItem,
+        },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
       { error: error.message || "Failed to confirm booking. Please try again." },
       { status: 400 }
