@@ -21,7 +21,6 @@ import {
   Users,
   Building,
   Loader2,
-  Check,
   X,
   ExternalLink,
   Sparkles,
@@ -466,37 +465,37 @@ export default function AdminPage() {
   // 1. Loading screen
   if (checkingAuth) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
         <Header />
         <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-10 h-10 text-teal-400 animate-spin" />
+          <Loader2 className="w-10 h-10 text-teal-600 animate-spin" />
         </div>
       </div>
     );
   }
 
-  // 2. Authentication Password Gate
+  // 2. Authentication Password Gate (Bright Theme)
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
         <Header />
         <main className="flex-1 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-slate-900/90 border border-slate-800 rounded-3xl p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-8 shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-teal-50 rounded-full blur-3xl pointer-events-none" />
 
             <div className="text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center mx-auto mb-3 text-teal-400">
+              <div className="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center mx-auto mb-3 text-teal-700 shadow-sm">
                 <KeyRound className="w-7 h-7" />
               </div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Admin Access</h1>
-              <p className="text-xs text-slate-400 mt-1">
+              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Admin Access</h1>
+              <p className="text-xs text-slate-500 mt-1">
                 Enter your administrative password to access schedule management.
               </p>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Admin Password
                 </label>
                 <input
@@ -505,7 +504,7 @@ export default function AdminPage() {
                   placeholder="Enter admin password..."
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-teal-500 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none transition-colors"
+                  className="w-full bg-white border border-slate-300 focus:border-teal-500 rounded-xl px-4 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none shadow-sm transition-colors"
                   autoFocus
                 />
               </div>
@@ -514,10 +513,10 @@ export default function AdminPage() {
                 type="submit"
                 id="admin-login-submit"
                 disabled={loginLoading}
-                className="w-full py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-slate-950 transition-all flex items-center justify-center gap-2 shadow-lg shadow-teal-500/25"
+                className="w-full py-3 rounded-xl font-bold text-sm bg-teal-600 hover:bg-teal-700 text-white transition-all flex items-center justify-center gap-2 shadow-md shadow-teal-600/20"
               >
                 {loginLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
                 ) : (
                   <Shield className="w-4 h-4" />
                 )}
@@ -525,8 +524,8 @@ export default function AdminPage() {
               </button>
             </form>
 
-            <div className="mt-6 pt-4 border-t border-slate-800 text-center">
-              <Link href="/" className="text-xs text-slate-400 hover:text-teal-300 transition-colors">
+            <div className="mt-6 pt-4 border-t border-slate-200 text-center">
+              <Link href="/" className="text-xs text-slate-500 hover:text-teal-700 transition-colors">
                 &larr; Return to Public Booking Portal
               </Link>
             </div>
@@ -536,30 +535,30 @@ export default function AdminPage() {
     );
   }
 
-  // 3. Authenticated Admin Dashboard
+  // 3. Authenticated Admin Dashboard (Bright Theme)
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       <Header isAdmin={true} onLogout={handleLogout} hasActiveSession={hasActiveSession} />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Top Control Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900/60 border border-slate-800 rounded-2xl p-5 shadow-lg backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                 Administration Console
               </h1>
               <span
                 className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
                   hasActiveSession
-                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                    : "bg-slate-800 text-slate-400 border border-slate-700"
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    : "bg-slate-100 text-slate-600 border border-slate-200"
                 }`}
               >
                 {hasActiveSession ? "Active Session" : "Pre-Upload"}
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-500 mt-0.5">
               {uploadedFilename ? `Loaded from: ${uploadedFilename}` : "No schedule uploaded yet"}
             </p>
           </div>
@@ -568,9 +567,9 @@ export default function AdminPage() {
             <Link
               href="/"
               target="_blank"
-              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 flex items-center gap-1.5 transition-colors"
             >
-              <ExternalLink className="w-3.5 h-3.5 text-teal-400" />
+              <ExternalLink className="w-3.5 h-3.5 text-teal-600" />
               <span>Preview Public View</span>
             </Link>
 
@@ -578,7 +577,7 @@ export default function AdminPage() {
               <button
                 onClick={handleExport}
                 id="export-results-btn"
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 text-slate-950 shadow-md shadow-teal-500/20 flex items-center gap-2 transition-all"
+                className="px-4 py-2 rounded-xl text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/20 flex items-center gap-2 transition-all"
               >
                 <Download className="w-3.5 h-3.5" />
                 <span>Export Results to Excel</span>
@@ -591,16 +590,16 @@ export default function AdminPage() {
         {!hasActiveSession ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Upload Card */}
-            <div className="lg:col-span-2 bg-slate-900/80 border border-slate-800 rounded-3xl p-8 shadow-xl relative overflow-hidden">
+            <div className="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-8 shadow-sm relative overflow-hidden">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400">
+                <div className="w-10 h-10 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700">
                   <UploadCloud className="w-5 h-5" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white tracking-tight">
+                  <h2 className="text-lg font-bold text-slate-900 tracking-tight">
                     Upload & Initialize Cleaning Schedule
                   </h2>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500">
                     Upload your institutional Excel file (.xlsx or .xls) to launch the booking session.
                   </p>
                 </div>
@@ -609,7 +608,7 @@ export default function AdminPage() {
               {/* Drag & drop upload area */}
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-700 hover:border-teal-500/60 rounded-2xl p-8 text-center cursor-pointer bg-slate-950/50 hover:bg-slate-950 transition-all group"
+                className="border-2 border-dashed border-slate-300 hover:border-teal-500 rounded-2xl p-8 text-center cursor-pointer bg-slate-50/70 hover:bg-white transition-all group"
               >
                 <input
                   type="file"
@@ -619,17 +618,17 @@ export default function AdminPage() {
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                   className="hidden"
                 />
-                <FileSpreadsheet className="w-12 h-12 text-slate-500 group-hover:text-teal-400 mx-auto mb-3 transition-colors" />
+                <FileSpreadsheet className="w-12 h-12 text-slate-400 group-hover:text-teal-600 mx-auto mb-3 transition-colors" />
                 {selectedFile ? (
                   <div className="space-y-1">
-                    <p className="text-sm font-bold text-teal-300">{selectedFile.name}</p>
-                    <p className="text-xs text-slate-400">
+                    <p className="text-sm font-bold text-teal-700">{selectedFile.name}</p>
+                    <p className="text-xs text-slate-500">
                       {(selectedFile.size / 1024).toFixed(1)} KB &bull; Click to choose another file
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold text-slate-300">
+                    <p className="text-sm font-semibold text-slate-800">
                       Click to browse or drag & drop Excel workbook
                     </p>
                     <p className="text-xs text-slate-500">Supports .xlsx and .xls formats</p>
@@ -642,7 +641,7 @@ export default function AdminPage() {
                 <a
                   href="/api/admin/sample-template"
                   download="bps_ac_cleaning_template.xlsx"
-                  className="text-xs text-teal-400 hover:text-teal-300 flex items-center gap-1.5 transition-colors"
+                  className="text-xs text-teal-700 hover:text-teal-900 font-medium flex items-center gap-1.5 transition-colors"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Download Sample Excel Template</span>
@@ -655,12 +654,12 @@ export default function AdminPage() {
                   disabled={!selectedFile || uploading}
                   className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
                     !selectedFile || uploading
-                      ? "bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed"
-                      : "bg-teal-500 hover:bg-teal-400 text-slate-950 shadow-lg shadow-teal-500/25"
+                      ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
+                      : "bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-600/20"
                   }`}
                 >
                   {uploading ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
                   ) : (
                     <CheckCircle2 className="w-4 h-4" />
                   )}
@@ -670,14 +669,14 @@ export default function AdminPage() {
             </div>
 
             {/* Quick Demo Seed Card */}
-            <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-8 shadow-xl flex flex-col justify-between">
+            <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm flex flex-col justify-between">
               <div>
-                <div className="flex items-center gap-2 text-amber-400 mb-3">
+                <div className="flex items-center gap-2 text-amber-600 mb-3">
                   <Sparkles className="w-5 h-5" />
                   <span className="text-xs font-bold uppercase tracking-wider">Fast Setup / Demo</span>
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Seed Sample Schedule</h3>
-                <p className="text-xs text-slate-400 leading-relaxed mb-6">
+                <h3 className="text-base font-bold text-slate-900 mb-2">Seed Sample Schedule</h3>
+                <p className="text-xs text-slate-600 leading-relaxed mb-6">
                   Don't have an Excel file ready? Instant-populate 19 institutional rooms across 3 dates
                   with the exact decimal time slots (`9.3`, `10.15`, `12`, etc.) and Club House exclusion
                   rule verified.
@@ -689,63 +688,63 @@ export default function AdminPage() {
                 id="seed-demo-btn"
                 onClick={handleSeedDemo}
                 disabled={uploading}
-                className="w-full py-3 rounded-xl font-bold text-xs bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 hover:border-teal-500/40 flex items-center justify-center gap-2 transition-all"
+                className="w-full py-3 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 text-teal-800 border border-slate-300 flex items-center justify-center gap-2 transition-all"
               >
                 {uploading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
                 ) : (
-                  <RotateCcw className="w-4 h-4 text-teal-400" />
+                  <RotateCcw className="w-4 h-4 text-teal-600" />
                 )}
                 <span>Load Demo Sample Schedule</span>
               </button>
             </div>
           </div>
         ) : (
-          /* STATE B: ACTIVE MANAGEMENT DASHBOARD */
+          /* STATE B: ACTIVE MANAGEMENT DASHBOARD (Bright Theme) */
           <div className="space-y-8">
             {/* KPI Stat Cards */}
             {stats && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5">
-                  <div className="flex items-center justify-between text-slate-400 mb-2">
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <div className="flex items-center justify-between text-slate-500 mb-2">
                     <span className="text-xs font-medium">Total Rooms</span>
-                    <Building className="w-4 h-4 text-teal-400" />
+                    <Building className="w-4 h-4 text-teal-600" />
                   </div>
-                  <div className="text-2xl font-black text-white">{stats.totalRooms}</div>
-                  <span className="text-[11px] text-slate-400 mt-1 block">
+                  <div className="text-2xl font-black text-slate-900">{stats.totalRooms}</div>
+                  <span className="text-[11px] text-slate-500 mt-1 block">
                     Across {stats.totalDates} cleaning dates
                   </span>
                 </div>
 
-                <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5">
-                  <div className="flex items-center justify-between text-slate-400 mb-2">
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <div className="flex items-center justify-between text-slate-500 mb-2">
                     <span className="text-xs font-medium">Completed Bookings</span>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   </div>
-                  <div className="text-2xl font-black text-emerald-400">{stats.bookedRooms}</div>
-                  <span className="text-[11px] text-slate-400 mt-1 block">
+                  <div className="text-2xl font-black text-emerald-600">{stats.bookedRooms}</div>
+                  <span className="text-[11px] text-slate-500 mt-1 block">
                     {((stats.bookedRooms / Math.max(stats.totalRooms, 1)) * 100).toFixed(0)}% completion rate
                   </span>
                 </div>
 
-                <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5">
-                  <div className="flex items-center justify-between text-slate-400 mb-2">
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <div className="flex items-center justify-between text-slate-500 mb-2">
                     <span className="text-xs font-medium">Remaining Unbooked</span>
-                    <Users className="w-4 h-4 text-amber-400" />
+                    <Users className="w-4 h-4 text-amber-600" />
                   </div>
-                  <div className="text-2xl font-black text-amber-300">{stats.availableRooms}</div>
-                  <span className="text-[11px] text-slate-400 mt-1 block">
+                  <div className="text-2xl font-black text-amber-700">{stats.availableRooms}</div>
+                  <span className="text-[11px] text-slate-500 mt-1 block">
                     Rooms still pending booking
                   </span>
                 </div>
 
-                <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-5">
-                  <div className="flex items-center justify-between text-slate-400 mb-2">
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                  <div className="flex items-center justify-between text-slate-500 mb-2">
                     <span className="text-xs font-medium">Available Time Slots</span>
-                    <Clock className="w-4 h-4 text-cyan-400" />
+                    <Clock className="w-4 h-4 text-cyan-600" />
                   </div>
-                  <div className="text-2xl font-black text-cyan-300">{stats.availableSlots}</div>
-                  <span className="text-[11px] text-slate-400 mt-1 block">
+                  <div className="text-2xl font-black text-cyan-700">{stats.availableSlots}</div>
+                  <span className="text-[11px] text-slate-500 mt-1 block">
                     Out of {stats.totalSlots} total slots
                   </span>
                 </div>
@@ -753,7 +752,7 @@ export default function AdminPage() {
             )}
 
             {/* Management Tabs */}
-            <div className="border-b border-slate-800 flex items-center justify-between gap-4 overflow-x-auto pb-2">
+            <div className="border-b border-slate-200 flex items-center justify-between gap-4 overflow-x-auto pb-2">
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -761,8 +760,8 @@ export default function AdminPage() {
                   onClick={() => setActiveTab("bookings")}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                     activeTab === "bookings"
-                      ? "bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20"
-                      : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+                      ? "bg-teal-600 text-white shadow-md shadow-teal-600/20"
+                      : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
                   }`}
                 >
                   <CheckCircle2 className="w-4 h-4" />
@@ -775,8 +774,8 @@ export default function AdminPage() {
                   onClick={() => setActiveTab("rooms")}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                     activeTab === "rooms"
-                      ? "bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20"
-                      : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+                      ? "bg-teal-600 text-white shadow-md shadow-teal-600/20"
+                      : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
                   }`}
                 >
                   <Building className="w-4 h-4" />
@@ -789,8 +788,8 @@ export default function AdminPage() {
                   onClick={() => setActiveTab("slots")}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                     activeTab === "slots"
-                      ? "bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20"
-                      : "bg-slate-900 text-slate-400 hover:text-white border border-slate-800"
+                      ? "bg-teal-600 text-white shadow-md shadow-teal-600/20"
+                      : "bg-white text-slate-600 hover:text-slate-900 border border-slate-200"
                   }`}
                 >
                   <Clock className="w-4 h-4" />
@@ -803,8 +802,8 @@ export default function AdminPage() {
                   onClick={() => setActiveTab("danger")}
                   className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                     activeTab === "danger"
-                      ? "bg-rose-500 text-white shadow-md shadow-rose-500/20"
-                      : "bg-slate-900 text-rose-400 hover:text-rose-300 border border-slate-800"
+                      ? "bg-rose-600 text-white shadow-md shadow-rose-600/20"
+                      : "bg-white text-rose-600 hover:text-rose-700 border border-slate-200"
                   }`}
                 >
                   <AlertTriangle className="w-4 h-4" />
@@ -824,7 +823,7 @@ export default function AdminPage() {
                     setRoomModalOpen(true);
                   }}
                   id="add-room-btn"
-                  className="px-3.5 py-2 text-xs font-bold rounded-xl bg-teal-500/20 text-teal-300 border border-teal-500/30 hover:bg-teal-500/30 flex items-center gap-1.5 shrink-0"
+                  className="px-3.5 py-2 text-xs font-bold rounded-xl bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 flex items-center gap-1.5 shrink-0"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Room</span>
@@ -841,7 +840,7 @@ export default function AdminPage() {
                     setSlotModalOpen(true);
                   }}
                   id="add-slot-btn"
-                  className="px-3.5 py-2 text-xs font-bold rounded-xl bg-teal-500/20 text-teal-300 border border-teal-500/30 hover:bg-teal-500/30 flex items-center gap-1.5 shrink-0"
+                  className="px-3.5 py-2 text-xs font-bold rounded-xl bg-teal-50 text-teal-700 border border-teal-200 hover:bg-teal-100 flex items-center gap-1.5 shrink-0"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Time Slot</span>
@@ -859,16 +858,16 @@ export default function AdminPage() {
                     placeholder="Search by room, floor, or time..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-teal-500"
+                    className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 shadow-sm"
                   />
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-slate-400" />
+                  <Calendar className="w-4 h-4 text-slate-500" />
                   <select
                     value={selectedDateFilter}
                     onChange={(e) => setSelectedDateFilter(e.target.value)}
-                    className="bg-slate-900 border border-slate-800 text-xs text-white rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500 cursor-pointer"
+                    className="bg-white border border-slate-300 text-xs text-slate-900 rounded-xl px-3 py-2 focus:outline-none focus:border-teal-500 cursor-pointer shadow-sm"
                   >
                     <option value="all">All Dates ({dates.length})</option>
                     {dates.map((d) => (
@@ -883,11 +882,11 @@ export default function AdminPage() {
 
             {/* TAB 1: COMPLETED BOOKINGS VIEW */}
             {activeTab === "bookings" && (
-              <div className="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400 font-semibold uppercase tracking-wider">
+                      <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider">
                         <th className="py-3.5 px-4">Room No</th>
                         <th className="py-3.5 px-4">Floor</th>
                         <th className="py-3.5 px-4">Assigned Cleaning Date</th>
@@ -896,23 +895,23 @@ export default function AdminPage() {
                         <th className="py-3.5 px-4">Booking Timestamp</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/60">
+                    <tbody className="divide-y divide-slate-100">
                       {filteredBookings.length === 0 ? (
                         <tr>
-                          <td colSpan={6} className="py-12 text-center text-slate-500">
+                          <td colSpan={6} className="py-12 text-center text-slate-400">
                             No bookings recorded yet.
                           </td>
                         </tr>
                       ) : (
                         filteredBookings.map((b) => (
-                          <tr key={b.id} className="hover:bg-slate-800/40 transition-colors">
-                            <td className="py-3.5 px-4 font-bold text-white">{b.roomNumber}</td>
-                            <td className="py-3.5 px-4 text-slate-300">{b.floor}</td>
-                            <td className="py-3.5 px-4 text-slate-300">
-                              <span className="font-semibold text-white">{b.dateString}</span>
+                          <tr key={b.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="py-3.5 px-4 font-bold text-slate-900">{b.roomNumber}</td>
+                            <td className="py-3.5 px-4 text-slate-600">{b.floor}</td>
+                            <td className="py-3.5 px-4 text-slate-600">
+                              <span className="font-semibold text-slate-900">{b.dateString}</span>
                             </td>
                             <td className="py-3.5 px-4">
-                              <span className="font-bold text-teal-300 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/20">
+                              <span className="font-bold text-teal-800 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200">
                                 {b.timeString}
                               </span>
                             </td>
@@ -920,14 +919,14 @@ export default function AdminPage() {
                               <span
                                 className={`font-semibold px-2 py-0.5 rounded-full text-[10px] ${
                                   b.staffAssistance
-                                    ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                                    : "bg-slate-800 text-slate-400 border border-slate-700"
+                                    ? "bg-amber-100 text-amber-800 border border-amber-300"
+                                    : "bg-slate-100 text-slate-600 border border-slate-200"
                                 }`}
                               >
                                 {b.staffAssistance ? "YES (Supervised)" : "No"}
                               </span>
                             </td>
-                            <td className="py-3.5 px-4 text-slate-400 font-mono text-[11px]">
+                            <td className="py-3.5 px-4 text-slate-500 font-mono text-[11px]">
                               {new Date(b.createdAt).toLocaleString("en-US", {
                                 timeZone: "Asia/Bangkok",
                               })}
@@ -943,11 +942,11 @@ export default function AdminPage() {
 
             {/* TAB 2: ROOMS CRUD TABLE */}
             {activeTab === "rooms" && (
-              <div className="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400 font-semibold uppercase tracking-wider">
+                      <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider">
                         <th className="py-3.5 px-4">Room No</th>
                         <th className="py-3.5 px-4">Floor</th>
                         <th className="py-3.5 px-4">Assigned Date</th>
@@ -955,25 +954,25 @@ export default function AdminPage() {
                         <th className="py-3.5 px-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/60">
+                    <tbody className="divide-y divide-slate-100">
                       {filteredRooms.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="py-12 text-center text-slate-500">
+                          <td colSpan={5} className="py-12 text-center text-slate-400">
                             No rooms found.
                           </td>
                         </tr>
                       ) : (
                         filteredRooms.map((room) => (
-                          <tr key={room.id} className="hover:bg-slate-800/40 transition-colors">
-                            <td className="py-3.5 px-4 font-bold text-white">{room.roomNumber}</td>
-                            <td className="py-3.5 px-4 text-slate-300">{room.floor}</td>
-                            <td className="py-3.5 px-4 text-slate-300">{room.cleaningDate.dateString}</td>
+                          <tr key={room.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="py-3.5 px-4 font-bold text-slate-900">{room.roomNumber}</td>
+                            <td className="py-3.5 px-4 text-slate-600">{room.floor}</td>
+                            <td className="py-3.5 px-4 text-slate-600">{room.cleaningDate.dateString}</td>
                             <td className="py-3.5 px-4">
                               <span
                                 className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                   room.isBooked
-                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                    : "bg-slate-800 text-slate-400 border border-slate-700"
+                                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                    : "bg-slate-100 text-slate-600 border border-slate-200"
                                 }`}
                               >
                                 {room.isBooked ? "Booked" : "Available"}
@@ -989,14 +988,14 @@ export default function AdminPage() {
                                   setRoomFormDateId(room.cleaningDateId);
                                   setRoomModalOpen(true);
                                 }}
-                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
                                 title="Edit Room"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteRoom(room.id, room.roomNumber)}
-                                className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                                className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors"
                                 title="Delete Room"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -1013,35 +1012,35 @@ export default function AdminPage() {
 
             {/* TAB 3: TIME SLOTS CRUD TABLE */}
             {activeTab === "slots" && (
-              <div className="bg-slate-900/80 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+              <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-slate-800 bg-slate-950/60 text-slate-400 font-semibold uppercase tracking-wider">
+                      <tr className="border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider">
                         <th className="py-3.5 px-4">Cleaning Date</th>
                         <th className="py-3.5 px-4">Time Slot</th>
                         <th className="py-3.5 px-4">Status</th>
                         <th className="py-3.5 px-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-800/60">
+                    <tbody className="divide-y divide-slate-100">
                       {filteredSlots.length === 0 ? (
                         <tr>
-                          <td colSpan={4} className="py-12 text-center text-slate-500">
+                          <td colSpan={4} className="py-12 text-center text-slate-400">
                             No slots found.
                           </td>
                         </tr>
                       ) : (
                         filteredSlots.map((slot) => (
-                          <tr key={slot.id} className="hover:bg-slate-800/40 transition-colors">
-                            <td className="py-3.5 px-4 text-slate-300">{slot.cleaningDate.dateString}</td>
-                            <td className="py-3.5 px-4 font-bold text-teal-300">{slot.timeSlot}</td>
+                          <tr key={slot.id} className="hover:bg-slate-50 transition-colors">
+                            <td className="py-3.5 px-4 text-slate-600">{slot.cleaningDate.dateString}</td>
+                            <td className="py-3.5 px-4 font-bold text-teal-800">{slot.timeSlot}</td>
                             <td className="py-3.5 px-4">
                               <span
                                 className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
                                   slot.isBooked
-                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                    : "bg-slate-800 text-slate-400 border border-slate-700"
+                                    ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                                    : "bg-slate-100 text-slate-600 border border-slate-200"
                                 }`}
                               >
                                 {slot.isBooked ? "Reserved" : "Open"}
@@ -1056,14 +1055,14 @@ export default function AdminPage() {
                                   setSlotFormDateId(slot.cleaningDateId);
                                   setSlotModalOpen(true);
                                 }}
-                                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
                                 title="Edit Slot"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleDeleteSlot(slot.id, slot.timeSlot)}
-                                className="p-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors"
+                                className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 transition-colors"
                                 title="Delete Slot"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
@@ -1080,26 +1079,26 @@ export default function AdminPage() {
 
             {/* TAB 4: DANGER ZONE / RESET */}
             {activeTab === "danger" && (
-              <div className="bg-rose-950/20 border border-rose-500/30 rounded-3xl p-8 shadow-xl space-y-6">
+              <div className="bg-rose-50/70 border border-rose-200 rounded-3xl p-8 shadow-sm space-y-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/40 flex items-center justify-center text-rose-400 shrink-0">
+                  <div className="w-12 h-12 rounded-2xl bg-rose-100 border border-rose-300 flex items-center justify-center text-rose-600 shrink-0">
                     <AlertTriangle className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-white tracking-tight">
+                    <h3 className="text-lg font-bold text-slate-900 tracking-tight">
                       Danger Zone: Reset Booking Session
                     </h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <p className="text-xs text-slate-600 mt-0.5">
                       Clears all current bookings, rooms, and uploaded slots, returning the system to the initial pre-upload state.
                     </p>
                   </div>
                 </div>
 
-                <div className="p-4 bg-slate-950/80 rounded-2xl border border-rose-500/20 text-xs text-slate-300 space-y-2">
-                  <p className="font-semibold text-rose-400">Warning: This action cannot be undone.</p>
+                <div className="p-4 bg-white rounded-2xl border border-rose-200 text-xs text-slate-700 space-y-2 shadow-sm">
+                  <p className="font-semibold text-rose-700">Warning: This action cannot be undone.</p>
                   <p>
                     All residents' confirmed bookings, room entries, and date-slot allocations will be permanently wiped.
-                    Make sure to click <span className="text-teal-300 font-semibold">"Export Results to Excel"</span> before proceeding if you need an archive.
+                    Make sure to click <span className="text-teal-700 font-semibold">"Export Results to Excel"</span> before proceeding if you need an archive.
                   </p>
                 </div>
 
@@ -1110,7 +1109,7 @@ export default function AdminPage() {
                     setResetConfirmationText("");
                     setResetModalOpen(true);
                   }}
-                  className="px-6 py-3 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-950/60 transition-all flex items-center gap-2"
+                  className="px-6 py-3 rounded-xl font-bold text-xs bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20 transition-all flex items-center gap-2"
                 >
                   <Trash2 className="w-4 h-4" />
                   <span>Reset Booking Session</span>
@@ -1123,15 +1122,15 @@ export default function AdminPage() {
 
       {/* ROOM ADD / EDIT MODAL */}
       {roomModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="font-bold text-base text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl space-y-4 text-slate-900">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <h3 className="font-bold text-base text-slate-900">
                 {roomModalMode === "add" ? "Add New Room" : "Edit Room"}
               </h3>
               <button
                 onClick={() => setRoomModalOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-slate-700"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1139,7 +1138,7 @@ export default function AdminPage() {
 
             <form onSubmit={handleSaveRoom} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Room Number (e.g. 39/92)
                 </label>
                 <input
@@ -1147,29 +1146,29 @@ export default function AdminPage() {
                   required
                   value={roomFormNumber}
                   onChange={(e) => setRoomFormNumber(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-teal-500 shadow-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Floor</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Floor</label>
                 <input
                   type="text"
                   required
                   value={roomFormFloor}
                   onChange={(e) => setRoomFormFloor(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-teal-500 shadow-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Assigned Cleaning Date
                 </label>
                 <select
                   value={roomFormDateId}
                   onChange={(e) => setRoomFormDateId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-teal-500 shadow-sm cursor-pointer"
                 >
                   {dates.map((d) => (
                     <option key={d.id} value={d.id}>
@@ -1183,13 +1182,13 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => setRoomModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 border border-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-teal-500 text-slate-950 text-xs font-bold hover:bg-teal-400"
+                  className="flex-1 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-700 shadow-sm"
                 >
                   Save Room
                 </button>
@@ -1201,15 +1200,15 @@ export default function AdminPage() {
 
       {/* SLOT ADD / EDIT MODAL */}
       {slotModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-              <h3 className="font-bold text-base text-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl space-y-4 text-slate-900">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+              <h3 className="font-bold text-base text-slate-900">
                 {slotModalMode === "add" ? "Add Time Slot" : "Edit Time Slot"}
               </h3>
               <button
                 onClick={() => setSlotModalOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-slate-700"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1217,7 +1216,7 @@ export default function AdminPage() {
 
             <form onSubmit={handleSaveSlot} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Time (e.g. 09:30 or 9.3)
                 </label>
                 <input
@@ -1226,18 +1225,18 @@ export default function AdminPage() {
                   placeholder="09:30"
                   value={slotFormTime}
                   onChange={(e) => setSlotFormTime(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-teal-500 shadow-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Cleaning Date
                 </label>
                 <select
                   value={slotFormDateId}
                   onChange={(e) => setSlotFormDateId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-500"
+                  className="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-900 focus:outline-none focus:border-teal-500 shadow-sm cursor-pointer"
                 >
                   {dates.map((d) => (
                     <option key={d.id} value={d.id}>
@@ -1251,13 +1250,13 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => setSlotModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 border border-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 rounded-xl bg-teal-500 text-slate-950 text-xs font-bold hover:bg-teal-400"
+                  className="flex-1 py-2.5 rounded-xl bg-teal-600 text-white text-xs font-bold hover:bg-teal-700 shadow-sm"
                 >
                   Save Slot
                 </button>
@@ -1269,23 +1268,23 @@ export default function AdminPage() {
 
       {/* DANGER RESET CONFIRMATION MODAL */}
       {resetModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-slate-900 border border-rose-500/40 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white border border-rose-300 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 text-slate-900">
+            <div className="w-12 h-12 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 mx-auto">
               <AlertTriangle className="w-6 h-6" />
             </div>
 
             <div className="text-center space-y-1.5">
-              <h3 className="text-lg font-bold text-white">Reset Booking Session?</h3>
-              <p className="text-xs text-slate-400">
+              <h3 className="text-lg font-bold text-slate-900">Reset Booking Session?</h3>
+              <p className="text-xs text-slate-600">
                 This will irreversibly delete all rooms, time slots, and resident bookings.
               </p>
             </div>
 
             <form onSubmit={handleResetSession} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1 text-center">
-                  Type <span className="font-mono text-rose-400 font-bold">RESET</span> to confirm:
+                <label className="block text-xs font-semibold text-slate-700 mb-1 text-center">
+                  Type <span className="font-mono text-rose-600 font-bold">RESET</span> to confirm:
                 </label>
                 <input
                   type="text"
@@ -1294,7 +1293,7 @@ export default function AdminPage() {
                   placeholder="RESET"
                   value={resetConfirmationText}
                   onChange={(e) => setResetConfirmationText(e.target.value)}
-                  className="w-full bg-slate-950 border border-rose-500/30 focus:border-rose-400 text-center font-mono font-bold tracking-widest uppercase rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none"
+                  className="w-full bg-slate-50 border border-rose-300 focus:border-rose-500 text-center font-mono font-bold tracking-widest uppercase rounded-xl px-4 py-2.5 text-sm text-slate-900 focus:outline-none"
                   autoFocus
                 />
               </div>
@@ -1303,7 +1302,7 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={() => setResetModalOpen(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-700"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-semibold hover:bg-slate-200 border border-slate-200"
                 >
                   Cancel
                 </button>
@@ -1313,8 +1312,8 @@ export default function AdminPage() {
                   disabled={resetConfirmationText !== "RESET" || resetting}
                   className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
                     resetConfirmationText !== "RESET" || resetting
-                      ? "bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700"
-                      : "bg-rose-600 hover:bg-rose-500 text-white shadow-lg shadow-rose-900/50"
+                      ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200"
+                      : "bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-600/20"
                   }`}
                 >
                   {resetting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
