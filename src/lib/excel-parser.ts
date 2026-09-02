@@ -24,6 +24,50 @@ export interface ParseResult {
 }
 
 /**
+ * Safely extracts pure text string from any ExcelJS cell value.
+ * Correctly handles:
+ * - string
+ * - number
+ * - RichText: { richText: [{ text: "1" }, { text: "st" }] } -> "1st"
+ * - Objects with .text or .result
+ * NEVER returns "[object Object]"
+ */
+export function extractCellText(val: any): string {
+  if (val === null || val === undefined) return "";
+
+  if (typeof val === "string") return val.trim();
+  if (typeof val === "number") return String(val).trim();
+  if (typeof val === "boolean") return String(val).trim();
+
+  if (val instanceof Date) {
+    const y = val.getUTCFullYear();
+    const m = String(val.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(val.getUTCDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  if (typeof val === "object") {
+    // RichText support (e.g. 1st with superscript "st")
+    if ("richText" in val && Array.isArray(val.richText)) {
+      return val.richText
+        .map((chunk: any) => (chunk && chunk.text ? chunk.text : ""))
+        .join("")
+        .trim();
+    }
+
+    if ("text" in val && typeof val.text === "string") {
+      return val.text.trim();
+    }
+
+    if ("result" in val && val.result !== null && val.result !== undefined) {
+      return extractCellText(val.result);
+    }
+  }
+
+  return String(val).trim();
+}
+
+/**
  * Format decimal time into HH:mm
  * Rules:
  * 9.3 -> 09:30
@@ -37,19 +81,16 @@ export interface ParseResult {
 export function formatDecimalTime(val: any): string | null {
   if (val === null || val === undefined || val === "") return null;
 
-  // Handle ExcelJS cell with formula/result
   if (typeof val === "object" && "result" in val) {
     val = val.result;
   }
 
-  // Handle Date object
   if (val instanceof Date) {
-    const hours = String(val.getHours()).padStart(2, "0");
-    const minutes = String(val.getMinutes()).padStart(2, "0");
+    const hours = String(val.getUTCHours()).padStart(2, "0");
+    const minutes = String(val.getUTCMinutes()).padStart(2, "0");
     return `${hours}:${minutes}`;
   }
 
-  // Handle numeric representation
   if (typeof val === "number") {
     const hour = Math.floor(val);
     const fracPart = Math.round((val - hour) * 100);
@@ -70,10 +111,9 @@ export function formatDecimalTime(val: any): string | null {
     return `${String(hour).padStart(2, "0")}:${minute}`;
   }
 
-  const str = String(val).trim();
+  const str = extractCellText(val);
   if (!str) return null;
 
-  // Handle "HH:mm" or "H:mm" format
   if (str.includes(":")) {
     const parts = str.split(":");
     const h = parseInt(parts[0], 10);
@@ -83,7 +123,6 @@ export function formatDecimalTime(val: any): string | null {
     }
   }
 
-  // Handle string numbers like "9.3" or "10.15" or "12"
   const num = parseFloat(str);
   if (!isNaN(num)) {
     return formatDecimalTime(num);
@@ -107,16 +146,14 @@ export function parseDateHeader(val: any): { dateString: string; displayDate: st
   if (val instanceof Date) {
     date = val;
   } else if (typeof val === "number") {
-    // Excel serial date representation
     if (val > 30000 && val < 60000) {
       date = new Date(Math.round((val - 25569) * 86400 * 1000));
     }
-  } else if (typeof val === "string") {
-    const s = val.trim();
+  } else if (typeof val === "string" || typeof val === "object") {
+    const s = extractCellText(val);
     if (!s) return null;
 
     const lower = s.toLowerCase();
-    // Stop / skip if non-date headers
     if (
       lower.includes("task") ||
       lower.includes("remark") ||
@@ -125,18 +162,21 @@ export function parseDateHeader(val: any): { dateString: string; displayDate: st
       lower.includes("fl") ||
       lower.includes("floor") ||
       lower.includes("room") ||
-      lower.includes("club")
+      lower.includes("club") ||
+      lower.includes("detail") ||
+      lower.includes("timeframe") ||
+      lower.includes("impact") ||
+      lower.includes("maintenance")
     ) {
       return null;
     }
 
-    // Check ISO or YYYY-MM-DD or YYYY/MM/DD
     const dateMatch = s.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
     if (dateMatch) {
       const year = parseInt(dateMatch[1], 10);
       const month = parseInt(dateMatch[2], 10) - 1;
       const day = parseInt(dateMatch[3], 10);
-      date = new Date(year, month, day);
+      date = new Date(Date.UTC(year, month, day));
     } else {
       const parsed = Date.parse(s);
       if (!isNaN(parsed)) {
@@ -147,18 +187,30 @@ export function parseDateHeader(val: any): { dateString: string; displayDate: st
 
   if (!date || isNaN(date.getTime())) return null;
 
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
+  // Use UTC to prevent local timezone shifts
+  const y = date.getUTCFullYear();
+  const m = String(date.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(date.getUTCDate()).padStart(2, "0");
   const dateString = `${y}-${m}-${d}`;
 
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: "long",
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  };
-  const displayDate = date.toLocaleDateString("en-US", options);
+  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+  const dayName = dayNames[date.getUTCDay()];
+  const monthName = monthNames[date.getUTCMonth()];
+  const displayDate = `${dayName}, ${monthName} ${d}, ${y}`;
 
   return { dateString, displayDate };
 }
@@ -173,7 +225,6 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (workbook.xlsx as any).load(buffer);
 
-  // Read ONLY the 1st sheet (index 0)
   const worksheet = workbook.worksheets[0];
   if (!worksheet) {
     throw new Error("The uploaded Excel workbook contains no sheets.");
@@ -187,15 +238,15 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
   for (let r = 1; r <= Math.min(worksheet.rowCount, 15); r++) {
     const row = worksheet.getRow(r);
     for (let c = 1; c <= worksheet.columnCount; c++) {
-      const cellVal = String(row.getCell(c).value || "").trim().toLowerCase();
-      if (cellVal === "fl" || cellVal === "floor") {
+      const cellText = extractCellText(row.getCell(c).value).toLowerCase();
+      if (cellText === "fl" || cellText === "floor") {
         floorColIndex = c;
       }
       if (
-        cellVal === "room no." ||
-        cellVal === "room no" ||
-        cellVal === "room" ||
-        cellVal === "room #"
+        cellText === "room no." ||
+        cellText === "room no" ||
+        cellText === "room" ||
+        cellText === "room #"
       ) {
         roomColIndex = c;
       }
@@ -213,7 +264,7 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
     );
   }
 
-  // 2. Locate Date columns starting from after the room column
+  // 2. Locate Date columns
   const headerRow = worksheet.getRow(headerRowIndex);
   interface DateColInfo {
     colIndex: number;
@@ -225,13 +276,17 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
   for (let c = Math.max(floorColIndex, roomColIndex) + 1; c <= worksheet.columnCount; c++) {
     const cellValue = headerRow.getCell(c).value;
     if (cellValue === null || cellValue === undefined || cellValue === "") {
-      // Stop scanning when encountering blank headers
       break;
     }
 
-    const cellText = String(cellValue).trim();
-    if (cellText.toLowerCase().includes("task") || cellText.toLowerCase().includes("maintenance")) {
-      // Stop scanning date columns when encountering non-date task headers
+    const cellText = extractCellText(cellValue).toLowerCase();
+    if (
+      cellText.includes("task") ||
+      cellText.includes("maintenance") ||
+      cellText.includes("detail") ||
+      cellText.includes("timeframe") ||
+      cellText.includes("impact")
+    ) {
       break;
     }
 
@@ -243,15 +298,12 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
         displayDate: dateInfo.displayDate,
       });
     } else {
-      // Non-date header encountered -> stop scanning
       break;
     }
   }
 
   if (dateColumns.length === 0) {
-    throw new Error(
-      "No valid date columns found in the schedule header. Please ensure dates are in format YYYY-MM-DD or valid date cells."
-    );
+    throw new Error("No valid date columns found in the schedule header.");
   }
 
   // 3. Scan rows for rooms and slots
@@ -279,28 +331,12 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
 
   for (let r = headerRowIndex + 1; r <= worksheet.rowCount; r++) {
     const row = worksheet.getRow(r);
-    const rawFloor = String(row.getCell(floorColIndex).value ?? "").trim();
-    const rawRoom = String(row.getCell(roomColIndex).value ?? "").trim();
+    const rawFloor = extractCellText(row.getCell(floorColIndex).value);
+    const rawRoom = extractCellText(row.getCell(roomColIndex).value);
 
-    if (!rawRoom) continue;
+    if (!rawRoom && !rawFloor) continue;
 
-    // Filtering rule: Completely IGNORE / EXCLUDE any row where Room Name is "Club House" (case-insensitive)
-    if (rawRoom.toLowerCase().includes("club house") || rawRoom.toLowerCase() === "clubhouse") {
-      ignoredRows.push(`Row ${r}: ${rawRoom} (Excluded: Club House)`);
-      continue;
-    }
-
-    // Exclude summary / total rows
-    if (
-      rawRoom.toLowerCase().includes("total") ||
-      rawRoom.toLowerCase().includes("summary") ||
-      rawRoom.toLowerCase().includes("cleaning")
-    ) {
-      ignoredRows.push(`Row ${r}: ${rawRoom} (Excluded: Annotation row)`);
-      continue;
-    }
-
-    // Check which date column contains a time slot for this room
+    // Check time slots on this row first
     let assignedDateCol: DateColInfo | null = null;
     let roomTimeSlot: string | null = null;
 
@@ -310,9 +346,30 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
       if (parsedTime) {
         assignedDateCol = dc;
         roomTimeSlot = parsedTime;
-        // Also register this time slot for this date
+        // Register time slot for this date
         scheduleMap.get(dc.dateString)?.timeSlotsSet.add(parsedTime);
       }
+    }
+
+    // Filtering rule: Completely IGNORE / EXCLUDE any row where Room Name is "Club House" (case-insensitive)
+    if (rawRoom.toLowerCase().includes("club house") || rawRoom.toLowerCase() === "clubhouse") {
+      ignoredRows.push(`Row ${r}: ${rawRoom} (Excluded: Club House)`);
+      continue;
+    }
+
+    // Exclude annotation / summary rows
+    if (
+      !rawRoom ||
+      rawRoom.toLowerCase().includes("supervision") ||
+      rawFloor.toLowerCase().includes("supervision") ||
+      rawRoom.toLowerCase().includes("total") ||
+      rawRoom.toLowerCase().includes("summary") ||
+      rawRoom.toLowerCase().includes("note") ||
+      rawRoom.toLowerCase().includes("remark") ||
+      rawRoom.toLowerCase().includes("cleaning")
+    ) {
+      ignoredRows.push(`Row ${r}: ${rawRoom || rawFloor} (Excluded: Annotation/Non-room row)`);
+      continue;
     }
 
     if (assignedDateCol) {
@@ -332,14 +389,13 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
     }
   }
 
-  // Convert map to array
+  // Convert map to array: include dates that have either rooms or time slots
   let totalUniqueSlots = 0;
   const schedules: ParsedDateSchedule[] = [];
 
   for (const dc of dateColumns) {
     const item = scheduleMap.get(dc.dateString);
     if (item && (item.rooms.length > 0 || item.timeSlotsSet.size > 0)) {
-      // Sort slots chronologically
       const sortedSlots = Array.from(item.timeSlotsSet).sort((a, b) => a.localeCompare(b));
       totalUniqueSlots += sortedSlots.length;
       schedules.push({
@@ -360,47 +416,48 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
   };
 }
 
+export interface ExportRowItem {
+  floor: string;
+  roomNumber: string;
+  timeSlot: string;
+  status: "CONFIRMED" | "AVAILABLE";
+  staffAssistance: string;
+  bookingTimestamp: string;
+}
+
+export interface ExportDateSheet {
+  dateString: string;
+  displayDate: string;
+  rows: ExportRowItem[];
+}
+
 /**
- * Multi-Sheet Excel Export
- * Generates one .xlsx file containing multiple sheets, where each sheet is named after a cleaning date (e.g., 2026-09-07, 2026-09-08).
- * Each sheet lists: Floor, Room Number, Time Slot, Staff Assistance Required.
+ * Generates one .xlsx workbook containing multiple sheets, where each sheet is named
+ * after a cleaning date (e.g., 2025-09-07, 2025-09-08).
+ * Lists all rooms and their booking statuses.
  */
-export async function generateMultiSheetExport(
-  dateGroups: Array<{
-    dateString: string;
-    displayDate: string;
-    bookings: Array<{
-      floor: string;
-      roomNumber: string;
-      timeString: string;
-      staffAssistance: boolean;
-      createdAt: Date | string;
-    }>;
-  }>
-): Promise<Buffer> {
+export async function generateMultiSheetExport(sheets: ExportDateSheet[]): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "BPS AC Cleaning Booking System";
   workbook.created = new Date();
 
-  // If no date groups, create an empty sheet
-  if (dateGroups.length === 0) {
-    const sheet = workbook.addWorksheet("No Bookings");
-    sheet.addRow(["No bookings recorded yet."]);
+  if (sheets.length === 0) {
+    const ws = workbook.addWorksheet("Schedule");
+    ws.addRow(["No cleaning dates or rooms scheduled."]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const buffer = await (workbook.xlsx as any).writeBuffer();
-    return Buffer.from(buffer);
+    const buf = await (workbook.xlsx as any).writeBuffer();
+    return Buffer.from(buf);
   }
 
-  for (const group of dateGroups) {
-    // Sheet name must be <= 31 chars
-    const sheetName = group.dateString.slice(0, 31);
+  for (const sheet of sheets) {
+    const sheetName = sheet.dateString.slice(0, 31);
     const worksheet = workbook.addWorksheet(sheetName);
 
-    // Title Block
-    worksheet.mergeCells("A1:E1");
+    // Title Row
+    worksheet.mergeCells("A1:F1");
     const titleCell = worksheet.getCell("A1");
-    titleCell.value = `AC Cleaning Schedule - ${group.displayDate} (${group.dateString})`;
-    titleCell.font = { name: "Arial", size: 14, bold: true, color: { argb: "FFFFFFFF" } };
+    titleCell.value = `AC Cleaning Schedule - ${sheet.displayDate} (${sheet.dateString})`;
+    titleCell.font = { name: "Arial", size: 13, bold: true, color: { argb: "FFFFFFFF" } };
     titleCell.fill = {
       type: "pattern",
       pattern: "solid",
@@ -415,11 +472,12 @@ export async function generateMultiSheetExport(
       "Floor",
       "Room Number",
       "Time Slot",
+      "Booking Status",
       "Staff Assistance Required",
       "Booking Timestamp",
     ];
     headerRow.height = 24;
-    headerRow.font = { name: "Arial", size: 11, bold: true, color: { argb: "FFFFFFFF" } };
+    headerRow.font = { name: "Arial", size: 10, bold: true, color: { argb: "FFFFFFFF" } };
     headerRow.alignment = { vertical: "middle", horizontal: "center" };
 
     headerRow.eachCell((cell) => {
@@ -436,57 +494,74 @@ export async function generateMultiSheetExport(
       };
     });
 
-    // Data Rows
-    // Sort bookings by timeSlot ascending
-    const sorted = [...group.bookings].sort((a, b) => a.timeString.localeCompare(b.timeString));
-
-    let rowIndex = 4;
-    for (const b of sorted) {
-      const row = worksheet.getRow(rowIndex);
-      const timestampStr =
-        b.createdAt instanceof Date
-          ? b.createdAt.toLocaleString("en-US", { timeZone: "Asia/Bangkok" })
-          : new Date(b.createdAt).toLocaleString("en-US", { timeZone: "Asia/Bangkok" });
-
-      row.values = [
-        b.floor,
-        b.roomNumber,
-        b.timeString,
-        b.staffAssistance ? "YES (Required)" : "No",
-        timestampStr,
-      ];
-
-      row.alignment = { vertical: "middle", horizontal: "center" };
-      row.font = { name: "Arial", size: 10 };
-
-      // Highlight staff assistance with amber tint
-      if (b.staffAssistance) {
-        row.getCell(4).fill = {
-          type: "pattern",
-          pattern: "solid",
-          fgColor: { argb: "FFFEF3C7" }, // Amber 100
-        };
-        row.getCell(4).font = { bold: true, color: { argb: "FFB45309" } };
-      }
-
-      row.eachCell((cell) => {
-        cell.border = {
-          top: { style: "thin", color: { argb: "FFE2E8F0" } },
-          bottom: { style: "thin", color: { argb: "FFE2E8F0" } },
-          left: { style: "thin", color: { argb: "FFE2E8F0" } },
-          right: { style: "thin", color: { argb: "FFE2E8F0" } },
-        };
+    if (sheet.rows.length === 0) {
+      const emptyRow = worksheet.getRow(4);
+      emptyRow.values = ["-", "No rooms or bookings recorded for this date", "-", "-", "-", "-"];
+      emptyRow.alignment = { vertical: "middle", horizontal: "center" };
+    } else {
+      // Sort rows: first by time slot, then by floor/room
+      const sorted = [...sheet.rows].sort((a, b) => {
+        const timeCmp = (a.timeSlot || "").localeCompare(b.timeSlot || "");
+        if (timeCmp !== 0) return timeCmp;
+        return (a.roomNumber || "").localeCompare(b.roomNumber || "");
       });
 
-      row.height = 20;
-      rowIndex++;
+      let rIdx = 4;
+      for (const item of sorted) {
+        const row = worksheet.getRow(rIdx);
+        row.values = [
+          item.floor,
+          item.roomNumber,
+          item.timeSlot || "Pending",
+          item.status,
+          item.staffAssistance,
+          item.bookingTimestamp,
+        ];
+        row.alignment = { vertical: "middle", horizontal: "center" };
+        row.font = { name: "Arial", size: 10 };
+
+        // Highlight confirmed vs available
+        if (item.status === "CONFIRMED") {
+          row.getCell(4).font = { bold: true, color: { argb: "FF047857" } }; // Emerald 700
+          row.getCell(4).fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFD1FAE5" }, // Emerald 100
+          };
+        } else {
+          row.getCell(4).font = { color: { argb: "FF64748B" } };
+        }
+
+        // Highlight staff assistance if YES
+        if (item.staffAssistance.toUpperCase().includes("YES")) {
+          row.getCell(5).fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFEF3C7" }, // Amber 100
+          };
+          row.getCell(5).font = { bold: true, color: { argb: "FFB45309" } };
+        }
+
+        row.eachCell((cell) => {
+          cell.border = {
+            top: { style: "thin", color: { argb: "FFE2E8F0" } },
+            bottom: { style: "thin", color: { argb: "FFE2E8F0" } },
+            left: { style: "thin", color: { argb: "FFE2E8F0" } },
+            right: { style: "thin", color: { argb: "FFE2E8F0" } },
+          };
+        });
+
+        row.height = 20;
+        rIdx++;
+      }
     }
 
-    // Auto-fit column widths
+    // Column widths
     worksheet.columns = [
       { width: 12 }, // Floor
       { width: 18 }, // Room Number
       { width: 15 }, // Time Slot
+      { width: 18 }, // Booking Status
       { width: 28 }, // Staff Assistance Required
       { width: 26 }, // Booking Timestamp
     ];

@@ -423,9 +423,27 @@ export default function AdminPage() {
   };
 
   // Export Results
-  const handleExport = () => {
-    window.location.href = "/api/admin/export";
-    showToast("Generating and downloading multi-sheet Excel export...", "info");
+  const handleExport = async () => {
+    try {
+      showToast("Generating multi-sheet Excel export...", "info");
+      const res = await fetch("/api/admin/export");
+      if (!res.ok) {
+        const err = await res.json().catch(() => null);
+        throw new Error(err?.error || `Export failed with status ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `BPS_AC_Schedule_Export_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      showToast("Excel export downloaded successfully!", "success");
+    } catch (err: any) {
+      showToast(err.message || "Failed to download Excel export.", "error");
+    }
   };
 
   // Filtered Bookings

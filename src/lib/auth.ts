@@ -34,13 +34,18 @@ export function verifyAuthToken(token: string | undefined): boolean {
 }
 
 export async function isAdminAuthenticated(): Promise<boolean> {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-  return verifyAuthToken(token);
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(COOKIE_NAME)?.value;
+    return verifyAuthToken(token);
+  } catch (error) {
+    return false;
+  }
 }
 
 export function validatePassword(password: string): boolean {
-  return password === ADMIN_PASSWORD;
+  const expectedPassword = process.env.ADMIN_PASSWORD || "admin1234";
+  return password === expectedPassword;
 }
 
 export async function setAdminSessionCookie() {
