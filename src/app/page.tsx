@@ -724,10 +724,6 @@ export default function BookingPage() {
       {/* Confirmation Modal */}
       <BookingReceiptModal receipt={receipt} onClose={() => setReceipt(null)} />
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white/70 py-6 text-center text-xs text-slate-500">
-        <p>BPS AC Cleaning Booking System &bull; Domain: bps.acbooking.com &bull; All Rights Reserved</p>
-      </footer>
     </div>
   );
 }
