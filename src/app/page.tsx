@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback } from "react";
 import Header from "@/components/Header";
+import RoomCombobox from "@/components/RoomCombobox";
 import BookingReceiptModal from "@/components/BookingReceiptModal";
 import { useToast } from "@/components/ToastContext";
 import {
@@ -10,10 +11,8 @@ import {
   HelpCircle,
   CheckCircle,
   AlertTriangle,
-  Search,
   Shield,
   Loader2,
-  Building,
   RefreshCw,
   X,
 } from "lucide-react";
@@ -54,7 +53,6 @@ export default function BookingPage() {
   // Booking Data
   const [rooms, setRooms] = useState<AvailableRoom[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<string>("");
-  const [roomSearchQuery, setRoomSearchQuery] = useState("");
   const [selectedFloor, setSelectedFloor] = useState<string>("all");
 
   const [slots, setSlots] = useState<AvailableSlot[]>([]);
@@ -123,16 +121,10 @@ export default function BookingPage() {
     return Array.from(set).sort();
   }, [rooms]);
 
-  // Filtered rooms
+  // The floor filter narrows the options before the combobox searches room numbers.
   const filteredRooms = useMemo(() => {
-    return rooms.filter((r) => {
-      const matchesSearch =
-        r.roomNumber.toLowerCase().includes(roomSearchQuery.toLowerCase()) ||
-        r.floor.toLowerCase().includes(roomSearchQuery.toLowerCase());
-      const matchesFloor = selectedFloor === "all" || r.floor === selectedFloor;
-      return matchesSearch && matchesFloor;
-    });
-  }, [rooms, roomSearchQuery, selectedFloor]);
+    return rooms.filter((room) => selectedFloor === "all" || room.floor === selectedFloor);
+  }, [rooms, selectedFloor]);
 
   // Fetch slots for a date
   const fetchSlotsForDate = useCallback(
@@ -385,15 +377,16 @@ export default function BookingPage() {
                   <div className="space-y-2">
                     {/* Filters & Search */}
                     <div className="flex flex-col sm:flex-row gap-2.5">
-                      <div className="relative flex-1">
-                        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                        <input
-                          type="text"
-                          id="room-search-input"
-                          placeholder="Search room number (e.g. 39/92)..."
-                          value={roomSearchQuery}
-                          onChange={(e) => setRoomSearchQuery(e.target.value)}
-                          className="w-full bg-white border border-slate-300 rounded-md pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors"
+                      <div className="flex-1 min-w-0">
+                        <RoomCombobox
+                          rooms={filteredRooms}
+                          selectedRoom={selectedRoom}
+                          onSelect={(id) => {
+                            if (id === selectedRoomId) return;
+                            setSelectedRoomId(id);
+                            setSelectedSlotId("");
+                            setSlots([]);
+                          }}
                         />
                       </div>
 
@@ -426,26 +419,6 @@ export default function BookingPage() {
                       )}
                     </div>
 
-                    {/* Dropdown Select Box */}
-                    <div className="relative">
-                      <select
-                        id="room-select-dropdown"
-                        value={selectedRoomId}
-                        onChange={(e) => setSelectedRoomId(e.target.value)}
-                        className="w-full bg-white border border-slate-300 hover:border-slate-400 text-slate-900 rounded-lg px-4 py-3 text-sm font-medium focus:outline-none focus:border-blue-500 transition-all cursor-pointer appearance-none"
-                      >
-                        <option value="">Select your room</option>
-                        {filteredRooms.map((room) => (
-                          <option key={room.id} value={room.id} className="text-slate-900 py-2">
-                            {room.roomNumber} ({room.floor.toLowerCase().includes("floor") ? room.floor : `Floor ${room.floor}`})
-                          </option>
-                        ))}
-                      </select>
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-xs flex items-center gap-1">
-                        <Building className="w-4 h-4 text-blue-600" />
-                        <span>▼</span>
-                      </div>
-                    </div>
                   </div>
                 )}
               </section>
