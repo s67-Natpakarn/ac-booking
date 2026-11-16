@@ -1,6 +1,7 @@
 "use client";
 
-import { CheckCircle2, Calendar, Clock, MapPin, UserCheck, Printer, ArrowRight } from "lucide-react";
+import { CheckCircle2, Calendar, CalendarPlus, Clock, MapPin, UserCheck, Printer, ArrowRight } from "lucide-react";
+import { bookingIcs } from "@/lib/booking-calendar";
 
 interface BookingReceipt {
   id: string;
@@ -11,6 +12,7 @@ interface BookingReceipt {
   timeSlot: string;
   staffAssistance: boolean;
   createdAt: string;
+  durationMinutes: number | null;
 }
 
 interface BookingReceiptModalProps {
@@ -21,19 +23,33 @@ interface BookingReceiptModalProps {
 export default function BookingReceiptModal({ receipt, onClose }: BookingReceiptModalProps) {
   if (!receipt) return null;
 
+  const addToCalendar = () => {
+    // A single-slot schedule has no gap to infer; use the standard 45 minutes.
+    const duration = receipt.durationMinutes ?? 45;
+    const file = new Blob([bookingIcs(receipt, duration)], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `ac-cleaning-${receipt.id}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  };
+
   const handlePrint = () => {
     window.print();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-3 bg-slate-900/60 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-xl px-6 py-5 sm:px-8 sm:py-6 text-slate-900 overflow-hidden">
+      <div role="dialog" aria-modal="true" aria-labelledby="booking-confirmed-title" className="relative w-full max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto bg-white border border-slate-200 rounded-xl px-6 py-5 sm:px-8 sm:py-6 text-slate-900">
         {/* Success Icon */}
         <div className="text-center mb-5">
           <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-300 flex items-center justify-center mx-auto mb-3">
             <CheckCircle2 className="w-9 h-9 text-emerald-600" />
           </div>
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+          <h2 id="booking-confirmed-title" className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
             Booking confirmed
           </h2>
           <p className="text-sm text-slate-600 mt-1">
@@ -94,8 +110,9 @@ export default function BookingReceiptModal({ receipt, onClose }: BookingReceipt
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="grid grid-cols-2 gap-3 print:hidden">
           <button
+            type="button"
             onClick={handlePrint}
             className="flex-1 py-3 px-4 rounded-md font-medium text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 flex items-center justify-center gap-2 transition-colors"
           >
@@ -103,13 +120,22 @@ export default function BookingReceiptModal({ receipt, onClose }: BookingReceipt
             <span>Print Receipt</span>
           </button>
           <button
-            onClick={onClose}
-            className="flex-1 py-3 px-4 rounded-md font-semibold text-sm bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 transition-all"
+            type="button"
+            onClick={addToCalendar}
+            className="py-3 px-3 rounded-md font-medium text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 flex items-center justify-center gap-2 transition-colors"
           >
-            <span>Done</span>
-            <ArrowRight className="w-4 h-4" />
+            <CalendarPlus className="w-4 h-4 shrink-0" />
+            <span>Add to calendar</span>
           </button>
         </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="mt-3 w-full py-3 px-4 rounded-md font-semibold text-sm bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 transition-colors print:hidden"
+        >
+          <span>Done</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

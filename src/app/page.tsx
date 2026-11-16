@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import Header from "@/components/Header";
 import RoomCombobox from "@/components/RoomCombobox";
+import { inferSlotDuration } from "@/lib/booking-calendar";
 import BookingReceiptModal from "@/components/BookingReceiptModal";
 import { useToast } from "@/components/ToastContext";
 import {
@@ -33,6 +34,7 @@ interface AvailableSlot {
 }
 
 interface ConfirmedBooking {
+  durationMinutes: number | null;
   id: string;
   roomNumber: string;
   floor: string;
@@ -268,7 +270,10 @@ export default function BookingPage() {
 
       // Success
       setConflictAlert(null);
-      setReceipt(data.booking);
+      setReceipt({
+        ...data.booking,
+        durationMinutes: inferSlotDuration(slots.map((slot) => slot.timeSlot)),
+      });
       showToast("Booking confirmed successfully!", "success");
 
       // Immediate reactive update: remove booked room and booked slot from state
