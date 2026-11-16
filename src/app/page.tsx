@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import Header from "@/components/Header";
 import RoomCombobox from "@/components/RoomCombobox";
 import BookingReceiptModal from "@/components/BookingReceiptModal";
@@ -53,6 +53,7 @@ export default function BookingPage() {
   // Booking Data
   const [rooms, setRooms] = useState<AvailableRoom[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<string>("");
+  const timeSectionRef = useRef<HTMLElement>(null);
   const [selectedFloor, setSelectedFloor] = useState<string>("all");
 
   const [slots, setSlots] = useState<AvailableSlot[]>([]);
@@ -114,6 +115,20 @@ export default function BookingPage() {
   const selectedRoom = useMemo(() => {
     return rooms.find((r) => r.id === selectedRoomId) || null;
   }, [rooms, selectedRoomId]);
+
+  useEffect(() => {
+    if (!selectedRoom || !window.matchMedia("(max-width: 767px)").matches) return;
+
+    // Let the mobile keyboard close before positioning the next selection section.
+    const timer = window.setTimeout(() => {
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      timeSectionRef.current?.scrollIntoView({
+        behavior: reducedMotion ? "instant" : "smooth",
+        block: "start",
+      });
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [selectedRoom]);
 
   // Distinct floors for filtering
   const distinctFloors = useMemo(() => {
@@ -425,7 +440,8 @@ export default function BookingPage() {
 
               {/* STEP 2: DATE & SLOT DISPLAY */}
               <section
-                className={`space-y-2 transition-all duration-300 ${selectedRoom ? "opacity-100" : "opacity-40 pointer-events-none"
+                ref={timeSectionRef}
+                className={`scroll-mt-18 space-y-2 transition-all duration-300 ${selectedRoom ? "opacity-100" : "opacity-40 pointer-events-none"
                   }`}
               >
                 <div className="flex items-center gap-3">
