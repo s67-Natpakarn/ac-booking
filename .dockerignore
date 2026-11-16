@@ -9,3 +9,5 @@ dev.db
 dev.db-journal
 test_download*.xlsx
 exported_schedule.xlsx
+.env*
+.neon
