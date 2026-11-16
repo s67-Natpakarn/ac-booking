@@ -54,10 +54,13 @@ export default function BookingPage() {
   const [rooms, setRooms] = useState<AvailableRoom[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<string>("");
   const timeSectionRef = useRef<HTMLElement>(null);
+  const slotRequestId = useRef(0);
+  const scrolledRoomId = useRef<string | null>(null);
   const [selectedFloor, setSelectedFloor] = useState<string>("all");
 
   const [slots, setSlots] = useState<AvailableSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [loadedSlotsDateId, setLoadedSlotsDateId] = useState<string | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string>("");
 
   const [staffAssistance, setStaffAssistance] = useState<boolean>(false);
@@ -117,10 +120,20 @@ export default function BookingPage() {
   }, [rooms, selectedRoomId]);
 
   useEffect(() => {
-    if (!selectedRoom || !window.matchMedia("(max-width: 767px)").matches) return;
+    if (!selectedRoom) {
+      scrolledRoomId.current = null;
+      return;
+    }
+    if (
+      loadingSlots ||
+      loadedSlotsDateId !== selectedRoom.cleaningDateId ||
+      scrolledRoomId.current === selectedRoom.id ||
+      !window.matchMedia("(max-width: 767px)").matches
+    ) return;
 
-    // Let the mobile keyboard close before positioning the next selection section.
+    // Wait for the selected date's slots to render and the keyboard to close.
     const timer = window.setTimeout(() => {
+      scrolledRoomId.current = selectedRoom.id;
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       timeSectionRef.current?.scrollIntoView({
         behavior: reducedMotion ? "instant" : "smooth",
@@ -128,7 +141,7 @@ export default function BookingPage() {
       });
     }, 300);
     return () => window.clearTimeout(timer);
-  }, [selectedRoom]);
+  }, [selectedRoom, loadingSlots, loadedSlotsDateId]);
 
   // Distinct floors for filtering
   const distinctFloors = useMemo(() => {
@@ -144,21 +157,27 @@ export default function BookingPage() {
   // Fetch slots for a date
   const fetchSlotsForDate = useCallback(
     async (dateId: string) => {
+      const requestId = ++slotRequestId.current;
+      setLoadedSlotsDateId(null);
       try {
         setLoadingSlots(true);
         const res = await fetch(`/api/booking/slots?dateId=${dateId}`);
+        if (!res.ok) throw new Error("Failed to fetch time slots");
         const data = await res.json();
+        if (requestId !== slotRequestId.current) return;
 
         if (data.slots) {
           setSlots(data.slots);
         } else {
           setSlots([]);
         }
+        setLoadedSlotsDateId(dateId);
       } catch (err) {
+        if (requestId !== slotRequestId.current) return;
         console.error(err);
         showToast("Error retrieving time slots for this date.", "error");
       } finally {
-        setLoadingSlots(false);
+        if (requestId === slotRequestId.current) setLoadingSlots(false);
       }
     },
     [showToast]
@@ -167,6 +186,9 @@ export default function BookingPage() {
   // When room changes, fetch slots for its assigned date
   useEffect(() => {
     if (!selectedRoom) {
+      slotRequestId.current += 1;
+      setLoadedSlotsDateId(null);
+      setLoadingSlots(false);
       setSlots([]);
       setSelectedSlotId("");
       return;
@@ -399,6 +421,7 @@ export default function BookingPage() {
                           onSelect={(id) => {
                             if (id === selectedRoomId) return;
                             setSelectedRoomId(id);
+                            setLoadedSlotsDateId(null);
                             setSelectedSlotId("");
                             setSlots([]);
                           }}
