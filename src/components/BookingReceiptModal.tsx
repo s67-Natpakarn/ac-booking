@@ -26,10 +26,10 @@ export default function BookingReceiptModal({ receipt, onClose }: BookingReceipt
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-xl p-6 sm:p-8 text-slate-900 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-3 bg-slate-900/60 animate-in fade-in duration-200">
+      <div className="relative w-full max-w-lg bg-white border border-slate-200 rounded-xl px-6 py-5 sm:px-8 sm:py-6 text-slate-900 overflow-hidden">
         {/* Success Icon */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-5">
           <div className="w-16 h-16 rounded-full bg-emerald-50 border-2 border-emerald-300 flex items-center justify-center mx-auto mb-3">
             <CheckCircle2 className="w-9 h-9 text-emerald-600" />
           </div>
@@ -45,7 +45,7 @@ export default function BookingReceiptModal({ receipt, onClose }: BookingReceipt
         </div>
 
         {/* Receipt Card Details */}
-        <div className="bg-slate-50 border border-slate-200/90 rounded-lg p-5 space-y-4 mb-6">
+        <div className="bg-slate-50 border border-slate-200/90 rounded-lg px-5 py-4 space-y-3 mb-5">
           <div className="flex items-center justify-between pb-3 border-b border-slate-200">
             <div className="flex items-center gap-2.5 text-slate-600">
               <MapPin className="w-4 h-4 text-blue-600 shrink-0" />

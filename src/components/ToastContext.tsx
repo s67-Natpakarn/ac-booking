@@ -40,7 +40,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto flex items-start gap-3 p-4 rounded-md   border text-sm transition-all duration-300 transform translate-y-0 animate-in fade-in slide-in-from-bottom-3 ${
+            className={`pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-md   border text-sm transition-all duration-300 transform translate-y-0 animate-in fade-in slide-in-from-bottom-3 ${
               toast.type === "success"
                 ? "bg-white border-emerald-300 text-emerald-900 "
                 : toast.type === "error"

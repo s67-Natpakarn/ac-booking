@@ -598,10 +598,10 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
         <Header />
-        <main className="flex-1 flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl p-8 relative overflow-hidden">
+        <main className="flex-1 flex items-center justify-center px-4 py-3">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl px-8 py-6 relative overflow-hidden">
 
-            <div className="text-center mb-6">
+            <div className="text-center mb-5">
               <div className="w-14 h-14 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center mx-auto mb-3 text-blue-700">
                 <KeyRound className="w-7 h-7" />
               </div>
@@ -611,7 +611,7 @@ export default function AdminPage() {
               </p>
             </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
+            <form onSubmit={handleLogin} className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Admin Password
@@ -642,7 +642,7 @@ export default function AdminPage() {
               </button>
             </form>
 
-            <div className="mt-6 pt-4 border-t border-slate-200 text-center">
+            <div className="mt-5 pt-3 border-t border-slate-200 text-center">
               <Link href="/" className="text-xs text-slate-500 hover:text-blue-700 transition-colors">
                 &larr; Return to Public Booking Portal
               </Link>
@@ -658,9 +658,9 @@ export default function AdminPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       <Header isAdmin={true} onLogout={handleLogout} hasActiveSession={hasActiveSession} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Top Control Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 rounded-lg p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-slate-200 rounded-lg px-5 py-4">
           <div>
             <div className="flex items-center gap-2.5">
               <h1 className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight">
@@ -708,8 +708,8 @@ export default function AdminPage() {
         {!hasActiveSession ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Upload Card */}
-            <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-8 relative overflow-hidden">
-              <div className="flex items-center gap-3 mb-6">
+            <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl px-8 py-6 relative overflow-hidden">
+              <div className="flex items-center gap-3 mb-5">
                 <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700">
                   <UploadCloud className="w-5 h-5" />
                 </div>
@@ -726,7 +726,7 @@ export default function AdminPage() {
               {/* Drag & drop upload area */}
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-lg p-8 text-center cursor-pointer bg-slate-50/70 hover:bg-white transition-all group"
+                className="border-2 border-dashed border-slate-300 hover:border-blue-500 rounded-lg px-8 py-6 text-center cursor-pointer bg-slate-50/70 hover:bg-white transition-all group"
               >
                 <input
                   type="file"
@@ -755,7 +755,7 @@ export default function AdminPage() {
               </div>
 
               {/* Upload Action Button */}
-              <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="mt-5 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <a
                   href="/api/admin/sample-template"
                   download="bps_ac_cleaning_template.xlsx"
@@ -787,14 +787,14 @@ export default function AdminPage() {
             </div>
 
             {/* Quick Demo Seed Card */}
-            <div className="bg-white border border-slate-200 rounded-xl p-8 flex flex-col justify-between">
+            <div className="bg-white border border-slate-200 rounded-xl px-8 py-6 flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-2 text-amber-600 mb-3">
                   <FileSpreadsheet className="w-5 h-5" />
                   <span className="text-xs font-bold uppercase tracking-wider">Fast Setup / Demo</span>
                 </div>
                 <h3 className="text-base font-bold text-slate-900 mb-2">Seed Sample Schedule</h3>
-                <p className="text-xs text-slate-600 leading-relaxed mb-6">
+                <p className="text-xs text-slate-600 leading-relaxed mb-5">
                   Don't have an Excel file ready? Instant-populate 19 institutional rooms across 3 dates
                   with the exact decimal time slots (`9.3`, `10.15`, `12`, etc.) and Club House exclusion
                   rule verified.
@@ -819,11 +819,11 @@ export default function AdminPage() {
           </div>
         ) : (
           /* STATE B: ACTIVE MANAGEMENT DASHBOARD (Bright Theme) */
-          <div className="space-y-8">
+          <div className="space-y-6">
             {/* KPI Stat Cards */}
             {stats && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-white border border-slate-200 rounded-lg p-5">
+                <div className="bg-white border border-slate-200 rounded-lg px-5 py-4">
                   <div className="flex items-center justify-between text-slate-500 mb-2">
                     <span className="text-xs font-medium">Total Rooms</span>
                     <Building className="w-4 h-4 text-blue-600" />
@@ -834,7 +834,7 @@ export default function AdminPage() {
                   </span>
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-lg p-5">
+                <div className="bg-white border border-slate-200 rounded-lg px-5 py-4">
                   <div className="flex items-center justify-between text-slate-500 mb-2">
                     <span className="text-xs font-medium">Completed Bookings</span>
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -845,7 +845,7 @@ export default function AdminPage() {
                   </span>
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-lg p-5">
+                <div className="bg-white border border-slate-200 rounded-lg px-5 py-4">
                   <div className="flex items-center justify-between text-slate-500 mb-2">
                     <span className="text-xs font-medium">Remaining Unbooked</span>
                     <Users className="w-4 h-4 text-amber-600" />
@@ -856,7 +856,7 @@ export default function AdminPage() {
                   </span>
                 </div>
 
-                <div className="bg-white border border-slate-200 rounded-lg p-5">
+                <div className="bg-white border border-slate-200 rounded-lg px-5 py-4">
                   <div className="flex items-center justify-between text-slate-500 mb-2">
                     <span className="text-xs font-medium">Available Time Slots</span>
                     <Clock className="w-4 h-4 text-blue-600" />
@@ -1017,7 +1017,7 @@ export default function AdminPage() {
                     <tbody className="divide-y divide-slate-100">
                       {filteredBookings.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="py-12 text-center text-slate-400">
+                          <td colSpan={7} className="py-10 text-center text-slate-400">
                             No bookings recorded yet.
                           </td>
                         </tr>
@@ -1120,7 +1120,7 @@ export default function AdminPage() {
                     <tbody className="divide-y divide-slate-100">
                       {filteredRooms.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="py-12 text-center text-slate-400">
+                          <td colSpan={5} className="py-10 text-center text-slate-400">
                             No rooms found.
                           </td>
                         </tr>
@@ -1189,7 +1189,7 @@ export default function AdminPage() {
                     <tbody className="divide-y divide-slate-100">
                       {filteredSlots.length === 0 ? (
                         <tr>
-                          <td colSpan={4} className="py-12 text-center text-slate-400">
+                          <td colSpan={4} className="py-10 text-center text-slate-400">
                             No slots found.
                           </td>
                         </tr>
@@ -1242,7 +1242,7 @@ export default function AdminPage() {
 
             {/* TAB 4: DANGER ZONE / RESET */}
             {activeTab === "danger" && (
-              <div className="bg-rose-50/70 border border-rose-200 rounded-xl p-8 space-y-6">
+              <div className="bg-rose-50/70 border border-rose-200 rounded-xl px-8 py-6 space-y-5">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-lg bg-rose-100 border border-rose-300 flex items-center justify-center text-rose-600 shrink-0">
                     <AlertTriangle className="w-6 h-6" />
@@ -1257,7 +1257,7 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                <div className="p-4 bg-white rounded-lg border border-rose-200 text-xs text-slate-700 space-y-2">
+                <div className="px-4 py-3 bg-white rounded-lg border border-rose-200 text-xs text-slate-700 space-y-2">
                   <p className="font-semibold text-rose-700">Warning: This action cannot be undone.</p>
                   <p>
                     All residents' confirmed bookings, room entries, and date-slot allocations will be permanently wiped.
@@ -1285,8 +1285,8 @@ export default function AdminPage() {
 
       {/* ROOM ADD / EDIT MODAL */}
       {roomModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl p-6 space-y-4 text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-3 bg-slate-900/60 animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl px-6 py-5 space-y-3 text-slate-900">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <h3 className="font-bold text-base text-slate-900">
                 {roomModalMode === "add" ? "Add New Room" : "Edit Room"}
@@ -1299,7 +1299,7 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveRoom} className="space-y-4">
+            <form onSubmit={handleSaveRoom} className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Room Number (e.g. 39/92)
@@ -1363,8 +1363,8 @@ export default function AdminPage() {
 
       {/* SLOT ADD / EDIT MODAL */}
       {slotModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 animate-in fade-in duration-150">
-          <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl p-6 space-y-4 text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-3 bg-slate-900/60 animate-in fade-in duration-150">
+          <div className="w-full max-w-md bg-white border border-slate-200 rounded-xl px-6 py-5 space-y-3 text-slate-900">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <h3 className="font-bold text-base text-slate-900">
                 {slotModalMode === "add" ? "Add Time Slot" : "Edit Time Slot"}
@@ -1377,7 +1377,7 @@ export default function AdminPage() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveSlot} className="space-y-4">
+            <form onSubmit={handleSaveSlot} className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">
                   Time (e.g. 09:30 or 9.3)
@@ -1431,8 +1431,8 @@ export default function AdminPage() {
 
       {/* DANGER RESET CONFIRMATION MODAL */}
       {resetModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 animate-in fade-in duration-200">
-          <div className="w-full max-w-md bg-white border border-rose-300 rounded-xl p-6 sm:p-8 space-y-5 text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-3 bg-slate-900/60 animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white border border-rose-300 rounded-xl px-6 py-5 sm:px-8 sm:py-6 space-y-4 text-slate-900">
             <div className="w-12 h-12 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 mx-auto">
               <AlertTriangle className="w-6 h-6" />
             </div>
@@ -1444,7 +1444,7 @@ export default function AdminPage() {
               </p>
             </div>
 
-            <form onSubmit={handleResetSession} className="space-y-4">
+            <form onSubmit={handleResetSession} className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1 text-center">
                   Type <span className="font-mono text-rose-600 font-bold">RESET</span> to confirm:
@@ -1490,9 +1490,9 @@ export default function AdminPage() {
 
       {/* EDIT BOOKING MODAL */}
       {editBookingModalOpen && selectedBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
-          <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-3 bg-slate-900/40">
+          <div className="bg-white border border-slate-200 rounded-xl px-6 py-5 w-full max-w-md animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
                   Edit Booking — Room {selectedBooking.roomNumber}
@@ -1514,7 +1514,7 @@ export default function AdminPage() {
               <span className="font-bold">Slot Re-allocation Rule:</span> When you select a new time slot below, the previous slot (<strong className="text-blue-950">{selectedBooking.timeString}</strong>) will automatically be freed up for other residents to choose.
             </div>
 
-            <form onSubmit={handleSaveBooking} className="mt-4 space-y-4">
+            <form onSubmit={handleSaveBooking} className="mt-3 space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Select Time Slot ({selectedBooking.dateString})
@@ -1635,8 +1635,8 @@ export default function AdminPage() {
 
       {/* DELETE BOOKING CONFIRMATION MODAL */}
       {deleteBookingModalOpen && bookingToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
-          <div className="bg-white border border-slate-200 rounded-xl p-6 w-full max-w-md animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 py-3 bg-slate-900/40">
+          <div className="bg-white border border-slate-200 rounded-xl px-6 py-5 w-full max-w-md animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
               <div className="w-10 h-10 rounded-lg bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-600 shrink-0">
                 <AlertTriangle className="w-5 h-5" />
@@ -1651,7 +1651,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="mt-4 space-y-3">
+            <div className="mt-3 space-y-3">
               <p className="text-xs text-slate-600 leading-relaxed">
                 Are you sure you want to delete the booking for <strong className="text-slate-900">Room {bookingToDelete.roomNumber}</strong> at <strong className="text-slate-900">{bookingToDelete.timeString}</strong>?
               </p>
@@ -1661,7 +1661,7 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="flex gap-2 pt-4 border-t border-slate-100 mt-4">
+            <div className="flex gap-2 pt-3 border-t border-slate-100 mt-3">
               <button
                 type="button"
                 onClick={() => setDeleteBookingModalOpen(false)}

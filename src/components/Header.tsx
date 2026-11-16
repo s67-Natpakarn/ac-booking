@@ -13,16 +13,13 @@ interface HeaderProps {
 export default function Header({ isAdmin = false, onLogout, hasActiveSession }: HeaderProps) {
   return (
     <header className="sticky top-0 z-40 w-full bg-white border-b border-slate-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-18 py-3 flex items-center justify-between gap-3">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-14 py-2 flex items-center justify-between gap-3">
         {/* Logo & Brand Title */}
         <Link href="/" className="flex min-w-0 items-center gap-3">
-          <Image src="/favicon.ico" alt="" width={40} height={40} unoptimized className="shrink-0 object-contain" />
+          <Image src="/favicon.ico" alt="" width={32} height={32} unoptimized className="shrink-0 object-contain" />
           <div className="flex flex-col">
-            <span className="font-semibold text-sm sm:text-lg text-blue-950 tracking-tight">
+            <span className="font-semibold text-sm sm:text-base text-blue-950 tracking-tight">
               BPS AC Cleaning Booking
-            </span>
-            <span className="text-xs text-slate-500 hidden sm:block">
-              Air conditioner cleaning schedule
             </span>
           </div>
         </Link>
