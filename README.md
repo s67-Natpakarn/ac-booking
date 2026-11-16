@@ -2,7 +2,7 @@
 
 A web application that converts Excel-based air-conditioner cleaning schedules into online bookings. Users can select an available time slot for their room on its assigned cleaning date.
 
-**[Live Website](https://bps-acbooking.onrender.com/)** · **[Source Code](https://github.com/s67-Natpakarn/ac-booking)**
+**[Live Website](https://ac-booking-eight.vercel.app/)** · **[Source Code](https://github.com/s67-Natpakarn/ac-booking)**
 
 ## Background
 
