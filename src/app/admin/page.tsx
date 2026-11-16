@@ -485,7 +485,7 @@ export default function AdminPage() {
   const handleResetSession = async (e: React.FormEvent) => {
     e.preventDefault();
     if (resetConfirmationText !== "RESET") {
-      showToast('Please type "RESET" in all capital letters to confirm.', "error");
+      showToast('Please type "RESET" to confirm.', "error");
       return;
     }
 
@@ -1455,8 +1455,8 @@ export default function AdminPage() {
                   required
                   placeholder="RESET"
                   value={resetConfirmationText}
-                  onChange={(e) => setResetConfirmationText(e.target.value)}
-                  className="w-full bg-slate-50 border border-rose-300 focus:border-rose-500 text-center font-mono font-bold tracking-widest uppercase rounded-md px-4 py-2.5 text-sm text-slate-900 focus:outline-none"
+                  onChange={(e) => setResetConfirmationText(e.target.value.toUpperCase())}
+                  className="w-full bg-slate-50 border border-rose-300 focus:border-rose-500 text-center font-mono font-bold tracking-widest rounded-md px-4 py-2.5 text-sm text-slate-900 focus:outline-none"
                   autoFocus
                 />
               </div>
