@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Calendar, CalendarPlus, Clock, MapPin, UserCheck, Printer, ArrowRight } from "lucide-react";
+import { CheckCircle2, Calendar, CalendarPlus, Clock, MapPin, UserCheck, ArrowRight } from "lucide-react";
 import { bookingIcs } from "@/lib/booking-calendar";
 
 interface BookingReceipt {
@@ -35,10 +35,6 @@ export default function BookingReceiptModal({ receipt, onClose }: BookingReceipt
     link.click();
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   return (
@@ -110,15 +106,7 @@ export default function BookingReceiptModal({ receipt, onClose }: BookingReceipt
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-3 print:hidden">
-          <button
-            type="button"
-            onClick={handlePrint}
-            className="flex-1 py-3 px-4 rounded-md font-medium text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 flex items-center justify-center gap-2 transition-colors"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Print Receipt</span>
-          </button>
+        <div className="grid grid-cols-1 print:hidden">
           <button
             type="button"
             onClick={addToCalendar}
