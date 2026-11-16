@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import Header from "@/components/Header";
 import RoomCombobox from "@/components/RoomCombobox";
+import BookingSkeleton, { TimeSlotsSkeleton } from "@/components/BookingSkeleton";
 import { inferSlotDuration } from "@/lib/booking-calendar";
 import { hasTouchInput } from "@/lib/device";
 import BookingReceiptModal from "@/components/BookingReceiptModal";
@@ -50,6 +51,7 @@ export default function BookingPage() {
   const { showToast } = useToast();
 
   const [loadingSession, setLoadingSession] = useState(true);
+  const [sessionError, setSessionError] = useState(false);
   const [hasActiveSession, setHasActiveSession] = useState(false);
   const [sessionTitle, setSessionTitle] = useState("BPS AC Cleaning Booking Schedule");
 
@@ -58,11 +60,13 @@ export default function BookingPage() {
   const [selectedRoomId, setSelectedRoomId] = useState<string>("");
   const timeSectionRef = useRef<HTMLElement>(null);
   const slotRequestId = useRef(0);
+  const [slotPlaceholderCount, setSlotPlaceholderCount] = useState(6);
   const scrolledRoomId = useRef<string | null>(null);
   const [selectedFloor, setSelectedFloor] = useState<string>("all");
 
   const [slots, setSlots] = useState<AvailableSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [slotsError, setSlotsError] = useState(false);
   const [loadedSlotsDateId, setLoadedSlotsDateId] = useState<string | null>(null);
   const [selectedSlotId, setSelectedSlotId] = useState<string>("");
 
@@ -83,17 +87,20 @@ export default function BookingPage() {
   const checkSession = async () => {
     try {
       setLoadingSession(true);
+      setSessionError(false);
       const res = await fetch("/api/session/status");
+      if (!res.ok) throw new Error("Failed to fetch session status");
       const data = await res.json();
 
       setHasActiveSession(data.hasActiveSession);
       if (data.sessionTitle) setSessionTitle(data.sessionTitle);
 
       if (data.hasActiveSession) {
-        await fetchRooms();
+        if (!(await fetchRooms())) throw new Error("Failed to fetch rooms");
       }
     } catch (err) {
       console.error(err);
+      setSessionError(true);
       showToast("Unable to load session status. Please try refreshing.", "error");
     } finally {
       setLoadingSession(false);
@@ -103,13 +110,15 @@ export default function BookingPage() {
   const fetchRooms = async () => {
     try {
       const res = await fetch("/api/booking/rooms");
+      if (!res.ok) throw new Error("Failed to fetch rooms");
       const data = await res.json();
-      if (data.rooms) {
-        setRooms(data.rooms);
-      }
+      if (!Array.isArray(data.rooms)) throw new Error("Invalid room response");
+      setRooms(data.rooms);
+      return true;
     } catch (err) {
       console.error(err);
       showToast("Failed to fetch available rooms.", "error");
+      return false;
     }
   };
 
@@ -162,6 +171,8 @@ export default function BookingPage() {
     async (dateId: string) => {
       const requestId = ++slotRequestId.current;
       setLoadedSlotsDateId(null);
+      setSlotsError(false);
+      setSelectedSlotId("");
       try {
         setLoadingSlots(true);
         const res = await fetch(`/api/booking/slots?dateId=${dateId}`);
@@ -169,15 +180,15 @@ export default function BookingPage() {
         const data = await res.json();
         if (requestId !== slotRequestId.current) return;
 
-        if (data.slots) {
-          setSlots(data.slots);
-        } else {
-          setSlots([]);
-        }
+        if (!Array.isArray(data.slots)) throw new Error("Invalid time slot response");
+        setSlots(data.slots);
+        if (data.slots.length > 0) setSlotPlaceholderCount(data.slots.length);
         setLoadedSlotsDateId(dateId);
       } catch (err) {
         if (requestId !== slotRequestId.current) return;
         console.error(err);
+        setSlotsError(true);
+        setSlots([]);
         showToast("Error retrieving time slots for this date.", "error");
       } finally {
         if (requestId === slotRequestId.current) setLoadingSlots(false);
@@ -192,6 +203,7 @@ export default function BookingPage() {
       slotRequestId.current += 1;
       setLoadedSlotsDateId(null);
       setLoadingSlots(false);
+      setSlotsError(false);
       setSlots([]);
       setSelectedSlotId("");
       return;
@@ -298,11 +310,16 @@ export default function BookingPage() {
       <Header hasActiveSession={hasActiveSession} />
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10">
-        {/* Loading Spinner */}
+        {/* Loading and session status */}
         {loadingSession ? (
-          <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
-            <p className="text-slate-500 text-sm font-medium">Checking active booking sessions...</p>
+          <BookingSkeleton />
+        ) : sessionError ? (
+          <div role="alert" className="rounded-xl border border-slate-200 bg-white px-6 py-5 space-y-3">
+            <p className="text-sm text-slate-700">Unable to load the booking schedule.</p>
+            <button type="button" onClick={checkSession} className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm text-blue-700 hover:bg-blue-50">
+              <RefreshCw className="w-4 h-4" />
+              Try again
+            </button>
           </div>
         ) : !hasActiveSession ? (
           /* State 1: No Active Session (Bright Theme) */
@@ -428,6 +445,8 @@ export default function BookingPage() {
                             if (id === selectedRoomId) return;
                             setSelectedRoomId(id);
                             setLoadedSlotsDateId(null);
+                            setLoadingSlots(Boolean(id));
+                            setSlotsError(false);
                             setSelectedSlotId("");
                             setSlots([]);
                           }}
@@ -523,12 +542,17 @@ export default function BookingPage() {
                     )}
 
                     {/* Time Slots Grid */}
-                    <div className="space-y-2">
+                    <div className="space-y-2" aria-busy={loadingSlots}>
 
                       {loadingSlots ? (
-                        <div className="px-8 py-6 flex items-center justify-center gap-2 text-slate-500 text-xs">
-                          <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                          Loading open time slots...
+                        <TimeSlotsSkeleton count={slotPlaceholderCount} />
+                      ) : slotsError ? (
+                        <div role="alert" className="flex flex-wrap items-center justify-between gap-3 py-2">
+                          <p className="text-sm text-slate-600">Unable to load time slots.</p>
+                          <button type="button" onClick={() => fetchSlotsForDate(selectedRoom.cleaningDateId)} className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-3 py-2 text-sm text-blue-700 hover:bg-blue-50">
+                            <RefreshCw className="w-4 h-4" />
+                            Try again
+                          </button>
                         </div>
                       ) : slots.length === 0 ? (
                         <div className="px-6 py-5 bg-slate-50 border border-slate-200 rounded-lg text-center text-slate-500 text-sm flex items-center justify-center gap-2">
