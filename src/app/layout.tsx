@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BPS AC Cleaning Booking System | bps.acbooking.com",
-  description: "Official institutional air conditioner cleaning schedule and resident reservation system.",
+  title: "A/C Cleaning Booking",
+  description: "Bangkok Patana School A/C Cleaning Reservation System",
   icons: {
     icon: "/favicon.ico",
   },
