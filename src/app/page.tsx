@@ -309,9 +309,9 @@ export default function BookingPage() {
           </div>
         ) : (
           /* State 2: Active Booking Flow (Bright Theme) */
-          <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="space-y-4 animate-in fade-in duration-300">
             {/* Session Banner */}
-            <div className="relative overflow-hidden rounded-xl bg-white border border-slate-200 px-6 py-5 sm:px-8 sm:py-6">
+            <div className="px-1">
               <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2.5 mb-2">
@@ -333,11 +333,11 @@ export default function BookingPage() {
             </div>
 
             {/* Booking Steps Card */}
-            <div className="bg-white border border-slate-200/90 rounded-xl px-6 py-5 sm:px-10 sm:py-8 space-y-8">
+            <div className="bg-white border border-slate-200/90 rounded-xl px-6 py-5 sm:px-6 sm:py-5 space-y-4">
               {/* STEP 1: ROOM SELECTION */}
-              <section className="space-y-3">
+              <section className="space-y-2">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-md bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">
+                  <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">
                     1
                   </div>
                   <div>
@@ -382,7 +382,7 @@ export default function BookingPage() {
                     All rooms in this schedule have been booked.
                   </div>
                 ) : (
-                  <div className="space-y-3 pt-2">
+                  <div className="space-y-2">
                     {/* Filters & Search */}
                     <div className="flex flex-col sm:flex-row gap-2.5">
                       <div className="relative flex-1">
@@ -434,7 +434,7 @@ export default function BookingPage() {
                         onChange={(e) => setSelectedRoomId(e.target.value)}
                         className="w-full bg-white border border-slate-300 hover:border-slate-400 text-slate-900 rounded-lg px-4 py-3 text-sm font-medium focus:outline-none focus:border-blue-500 transition-all cursor-pointer appearance-none"
                       >
-                        <option value="">-- Choose your room from dropdown ({filteredRooms.length} available) --</option>
+                        <option value="">Select your room</option>
                         {filteredRooms.map((room) => (
                           <option key={room.id} value={room.id} className="text-slate-900 py-2">
                             {room.roomNumber} ({room.floor.toLowerCase().includes("floor") ? room.floor : `Floor ${room.floor}`})
@@ -452,11 +452,11 @@ export default function BookingPage() {
 
               {/* STEP 2: DATE & SLOT DISPLAY */}
               <section
-                className={`space-y-3 transition-all duration-300 ${selectedRoom ? "opacity-100" : "opacity-40 pointer-events-none"
+                className={`space-y-2 transition-all duration-300 ${selectedRoom ? "opacity-100" : "opacity-40 pointer-events-none"
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-md bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">
+                  <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">
                     2
                   </div>
                   <div>
@@ -467,9 +467,9 @@ export default function BookingPage() {
                 </div>
 
                 {selectedRoom && (
-                  <div className="space-y-3 pt-1">
+                  <div className="space-y-2">
                     {/* Assigned Date Badge Banner */}
-                    <div className="flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-sm text-blue-950">
+                    <div className="flex items-center gap-2 text-sm text-blue-950">
                       <Calendar className="w-4 h-4 text-blue-600 shrink-0" />
                       <span className="font-medium">{selectedRoom.displayDate}</span>
                     </div>
@@ -564,7 +564,6 @@ export default function BookingPage() {
                                   <Clock className={`w-3.5 h-3.5 ${isSelected ? "text-white" : "text-blue-600"}`} />
                                   <span className="font-bold text-sm">{slot.timeSlot}</span>
                                 </div>
-                                {isSelected && <CheckCircle className="w-3.5 h-3.5 shrink-0" />}
                               </button>
                             );
                           })}
@@ -577,11 +576,11 @@ export default function BookingPage() {
 
               {/* STEP 3: ASSISTANCE INQUIRY */}
               <section
-                className={`space-y-3 transition-all duration-300 ${selectedSlotId ? "opacity-100" : "opacity-40 pointer-events-none"
+                className={`space-y-2 transition-all duration-300 ${selectedSlotId ? "opacity-100" : "opacity-40 pointer-events-none"
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-md bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">
+                  <div className="w-6 h-6 rounded-md bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">
                     3
                   </div>
                   <div>
@@ -591,65 +590,42 @@ export default function BookingPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                  {/* Option: NO (Default) */}
-                  <div
-                    onClick={() => setStaffAssistance(false)}
-                    id="assistance-no"
-                    className={`cursor-pointer px-4 py-3 rounded-lg border transition-all flex items-start gap-3.5  ${!staffAssistance
-                        ? "bg-blue-50/80 border-blue-500 "
-                        : "bg-white border-slate-200 hover:border-slate-300"
-                      }`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${!staffAssistance
-                          ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-slate-300 bg-transparent"
-                        }`}
-                    >
-                      {!staffAssistance && <CheckCircle className="w-3.5 h-3.5 fill-current" />}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-slate-900">No assistance</span>
-                      </div>
-                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                        I will arrange room access.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Option: YES */}
-                  <div
-                    onClick={() => setStaffAssistance(true)}
-                    id="assistance-yes"
-                    className={`cursor-pointer px-4 py-3 rounded-lg border transition-all flex items-start gap-3.5  ${staffAssistance
-                        ? "bg-amber-50 border-amber-500 "
-                        : "bg-white border-slate-200 hover:border-slate-300"
-                      }`}
-                  >
-                    <div
-                      className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${staffAssistance
-                          ? "border-amber-600 bg-amber-600 text-white"
-                          : "border-slate-300 bg-transparent"
-                        }`}
-                    >
-                      {staffAssistance && <CheckCircle className="w-3.5 h-3.5 fill-current" />}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-sm text-slate-900">Request assistance</span>
-                      </div>
-                      <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                        Staff will accompany the technician.
-                      </p>
-                    </div>
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6" role="radiogroup" aria-label="Staff assistance">
+                  <label className="flex min-h-11 items-center gap-3 py-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="staff-assistance"
+                      id="assistance-no"
+                      checked={!staffAssistance}
+                      onChange={() => setStaffAssistance(false)}
+                      disabled={!selectedSlotId}
+                      className="w-4 h-4 shrink-0 appearance-auto accent-blue-600"
+                    />
+                    <span>
+                      <span className="block font-medium text-sm text-slate-900">No assistance</span>
+                      <span className="block text-xs text-slate-500">I will arrange room access.</span>
+                    </span>
+                  </label>
+                  <label className="flex min-h-11 items-center gap-3 py-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="staff-assistance"
+                      id="assistance-yes"
+                      checked={staffAssistance}
+                      onChange={() => setStaffAssistance(true)}
+                      disabled={!selectedSlotId}
+                      className="w-4 h-4 shrink-0 appearance-auto accent-blue-600"
+                    />
+                    <span>
+                      <span className="block font-medium text-sm text-slate-900">Request assistance</span>
+                      <span className="block text-xs text-slate-500">Staff will accompany the technician.</span>
+                    </span>
+                  </label>
                 </div>
               </section>
 
               {/* STEP 4: SUBMISSION & CONFIRMATION */}
-              <div className="pt-5 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="pt-3 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="text-xs text-slate-500 flex items-center gap-2">
                   <HelpCircle className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>Check your room and time before confirming.</span>
