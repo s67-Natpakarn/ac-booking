@@ -79,26 +79,25 @@ export async function seedDemoSchedule() {
         },
       });
 
-      // Insert unique time slots for this date
-      for (const slot of schedule.timeSlots) {
-        await tx.timeSlot.create({
-          data: {
+      // Keep demo imports efficient over a remote database connection too.
+      if (schedule.timeSlots.length > 0) {
+        await tx.timeSlot.createMany({
+          data: schedule.timeSlots.map((slot) => ({
             cleaningDateId: createdDate.id,
             timeSlot: slot,
             isBooked: false,
-          },
+          })),
         });
       }
 
-      // Insert rooms for this date
-      for (const room of schedule.rooms) {
-        await tx.room.create({
-          data: {
+      if (schedule.rooms.length > 0) {
+        await tx.room.createMany({
+          data: schedule.rooms.map((room) => ({
             cleaningDateId: createdDate.id,
             roomNumber: room.roomNumber,
             floor: room.floor,
             isBooked: false,
-          },
+          })),
         });
       }
     }
@@ -118,7 +117,7 @@ export async function seedDemoSchedule() {
         uploadedFilename: "sample_bps_ac_cleaning_schedule.xlsx",
       },
     });
-  });
+  }, { maxWait: 10_000, timeout: 30_000 });
 
   return parsed;
 }

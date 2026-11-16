@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/auth";
 import { seedDemoSchedule } from "@/lib/sample-data";
 
+export const maxDuration = 60;
+
 export async function POST() {
   try {
     const isAuthed = await isAdminAuthenticated();

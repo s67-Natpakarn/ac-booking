@@ -3,6 +3,8 @@ import { isAdminAuthenticated } from "@/lib/auth";
 import { parseExcelBuffer } from "@/lib/excel-parser";
 import { prisma } from "@/lib/prisma";
 
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     const isAuthed = await isAdminAuthenticated();
@@ -58,26 +60,25 @@ export async function POST(request: NextRequest) {
           },
         });
 
-        // Unique slots for this date
-        for (const slot of schedule.timeSlots) {
-          await tx.timeSlot.create({
-            data: {
+        // Bulk writes avoid a network round trip for every Excel row.
+        if (schedule.timeSlots.length > 0) {
+          await tx.timeSlot.createMany({
+            data: schedule.timeSlots.map((slot) => ({
               cleaningDateId: createdDate.id,
               timeSlot: slot,
               isBooked: false,
-            },
+            })),
           });
         }
 
-        // Rooms for this date
-        for (const room of schedule.rooms) {
-          await tx.room.create({
-            data: {
+        if (schedule.rooms.length > 0) {
+          await tx.room.createMany({
+            data: schedule.rooms.map((room) => ({
               cleaningDateId: createdDate.id,
               roomNumber: room.roomNumber,
               floor: room.floor,
               isBooked: false,
-            },
+            })),
           });
         }
       }
@@ -96,7 +97,7 @@ export async function POST(request: NextRequest) {
           uploadedFilename: file.name,
         },
       });
-    });
+    }, { maxWait: 10_000, timeout: 30_000 });
 
     return NextResponse.json({
       success: true,
