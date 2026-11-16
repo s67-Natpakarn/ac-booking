@@ -12,6 +12,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NODE_ENV=production
+ENV NEXT_OUTPUT_STANDALONE=1
 RUN npx prisma generate
 RUN npm run build
 
