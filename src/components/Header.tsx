@@ -18,10 +18,10 @@ export default function Header({ isAdmin = false, onLogout, hasActiveSession }: 
         <Link href="/" className="flex min-w-0 items-center gap-3">
           <Image src="/favicon.ico" alt="" width={40} height={40} unoptimized className="shrink-0 object-contain" />
           <div className="flex flex-col">
-            <span className="font-semibold text-sm sm:text-lg text-blue-950 tracking-tight">
+            <span className="font-semibold text-lg sm:text-2xl text-blue-950 tracking-tight leading-tight">
               BPS AC Cleaning Booking
             </span>
-            <span className="text-xs text-slate-500 hidden sm:block">
+            <span className="text-sm text-slate-500 hidden sm:block">
               Air conditioner cleaning schedule
             </span>
           </div>
