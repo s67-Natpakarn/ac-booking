@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import Header from "@/components/Header";
 import RoomCombobox from "@/components/RoomCombobox";
 import { inferSlotDuration } from "@/lib/booking-calendar";
+import { hasTouchInput } from "@/lib/device";
 import BookingReceiptModal from "@/components/BookingReceiptModal";
 import { useToast } from "@/components/ToastContext";
 import {
@@ -130,7 +131,7 @@ export default function BookingPage() {
       loadingSlots ||
       loadedSlotsDateId !== selectedRoom.cleaningDateId ||
       scrolledRoomId.current === selectedRoom.id ||
-      !window.matchMedia("(max-width: 767px)").matches
+      !hasTouchInput()
     ) return;
 
     // Wait for the selected date's slots to render and the keyboard to close.

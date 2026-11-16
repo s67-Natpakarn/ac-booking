@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
+import { hasTouchInput } from "@/lib/device";
 
 interface RoomOption {
   id: string;
@@ -36,7 +37,7 @@ export default function RoomCombobox({ rooms, selectedRoom, onSelect }: RoomComb
     setQuery("");
     setOpen(false);
     setActiveIndex(-1);
-    if (window.matchMedia("(max-width: 767px)").matches) {
+    if (hasTouchInput()) {
       inputRef.current?.blur();
     }
   };
@@ -103,7 +104,7 @@ export default function RoomCombobox({ rooms, selectedRoom, onSelect }: RoomComb
             setActiveIndex(-1);
           }
         }}
-        className="w-full bg-white border border-slate-300 rounded-md pl-9 pr-11 py-2.5 text-base md:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+        className="w-full bg-white border border-slate-300 rounded-md pl-9 pr-11 py-2.5 text-base text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
       />
       {selectedRoom || query ? (
         <button
