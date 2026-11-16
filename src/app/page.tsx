@@ -11,7 +11,6 @@ import {
   CheckCircle,
   AlertTriangle,
   Search,
-  Sparkles,
   Shield,
   Loader2,
   Building,
@@ -260,26 +259,25 @@ export default function BookingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-teal-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-blue-500 selection:text-white">
       <Header hasActiveSession={hasActiveSession} />
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Loading Spinner */}
         {loadingSession ? (
           <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-            <Loader2 className="w-10 h-10 text-teal-600 animate-spin" />
+            <Loader2 className="w-10 h-10 text-blue-600 animate-spin" />
             <p className="text-slate-500 text-sm font-medium">Checking active booking sessions...</p>
           </div>
         ) : !hasActiveSession ? (
           /* State 1: No Active Session (Bright Theme) */
-          <div className="max-w-2xl mx-auto my-12 bg-white border border-slate-200/90 rounded-3xl p-8 sm:p-12 text-center shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-teal-50 rounded-full blur-3xl pointer-events-none" />
-            <div className="w-20 h-20 rounded-3xl bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-6 shadow-inner text-slate-500">
+          <div className="max-w-2xl mx-auto my-12 bg-white border border-slate-200/90 rounded-xl p-8 sm:p-12 text-center relative overflow-hidden">
+            <div className="w-20 h-20 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center mx-auto mb-6 text-slate-500">
               <Calendar className="w-10 h-10 text-slate-500" />
             </div>
 
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-semibold mb-4 border border-amber-200">
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
               Schedule Inactive
             </div>
 
@@ -291,19 +289,19 @@ export default function BookingPage() {
               No active booking session at this time. Please check back later or contact administration.
             </p>
 
-            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 max-w-md mx-auto text-xs text-slate-600 flex items-start gap-3 text-left shadow-sm">
-              <Shield className="w-5 h-5 text-teal-600 shrink-0 mt-0.5" />
+            <div className="p-5 bg-slate-50 rounded-lg border border-slate-200 max-w-md mx-auto text-xs text-slate-600 flex items-start gap-3 text-left">
+              <Shield className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
               <div>
                 <span className="font-semibold text-slate-800">Are you a system administrator?</span>
                 <p className="mt-0.5 text-slate-600">
-                  Log in via the <span className="text-teal-700 font-semibold">"For Admin"</span> button on the top right to upload the official schedule and initialize the booking window.
+                  Log in via the <span className="text-blue-700 font-semibold">"Admin"</span> button on the top right to upload a schedule and open bookings.
                 </p>
               </div>
             </div>
 
             <button
               onClick={checkSession}
-              className="mt-8 inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shadow-sm transition-colors"
+              className="mt-8 inline-flex items-center gap-2 px-4 py-2 text-xs font-semibold rounded-md bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition-colors"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Refresh Status
@@ -313,38 +311,38 @@ export default function BookingPage() {
           /* State 2: Active Booking Flow (Bright Theme) */
           <div className="space-y-8 animate-in fade-in duration-300">
             {/* Session Banner */}
-            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-teal-50 via-white to-cyan-50 border border-teal-200/90 p-6 sm:p-8 shadow-sm">
+            <div className="relative overflow-hidden rounded-xl bg-white border border-slate-200 p-6 sm:p-8">
               <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-2.5 mb-2">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-teal-100 text-teal-800 border border-teal-200">
-                      <Sparkles className="w-3.5 h-3.5 text-teal-600" /> Open for Booking
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                      Booking open
                     </span>
                     <span className="text-xs text-slate-500 font-medium">
                       {rooms.length} rooms remaining unbooked
                     </span>
                   </div>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
                     {sessionTitle}
                   </h1>
                   <p className="text-sm text-slate-600 mt-1 max-w-2xl">
-                    Select your residential room to view its assigned maintenance date, then pick your preferred cleaning slot.
+                    Choose your room, check the cleaning date, and select a time.
                   </p>
                 </div>
               </div>
             </div>
 
             {/* Booking Steps Card */}
-            <div className="bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-10 shadow-xl space-y-10">
+            <div className="bg-white border border-slate-200/90 rounded-xl p-6 sm:p-10 space-y-10">
               {/* STEP 1: ROOM SELECTION */}
               <section className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 font-bold flex items-center justify-center text-sm border border-teal-200 shadow-sm">
+                  <div className="w-8 h-8 rounded-md bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">
                     1
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                      Step 1: Select Your Room
+                      Select your room
                     </h2>
                     <p className="text-xs text-slate-500">
                       Choose from the list of unbooked rooms scheduled for this cycle.
@@ -354,14 +352,14 @@ export default function BookingPage() {
 
                 {/* ROOM CONFLICT ALERT BANNER */}
                 {conflictAlert && conflictAlert.type === "ROOM" && (
-                  <div className="p-4.5 bg-rose-50 border-2 border-rose-400 rounded-2xl shadow-md flex items-start gap-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="w-10 h-10 rounded-xl bg-rose-100 border border-rose-300 flex items-center justify-center text-rose-600 shrink-0 mt-0.5">
-                      <AlertTriangle className="w-5 h-5 text-rose-600 animate-pulse" />
+                  <div className="p-4.5 bg-rose-50 border-2 border-rose-400 rounded-lg flex items-start gap-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="w-10 h-10 rounded-md bg-rose-100 border border-rose-300 flex items-center justify-center text-rose-600 shrink-0 mt-0.5">
+                      <AlertTriangle className="w-5 h-5 text-rose-600" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between">
-                        <h4 className="text-sm font-black text-rose-950 flex items-center gap-1.5">
-                          ⚠️ Room Conflict: Room Just Booked by Another Resident!
+                        <h4 className="text-sm font-semibold text-rose-950 flex items-center gap-1.5">
+                           This room has just been booked
                         </h4>
                         <button
                           type="button"
@@ -375,16 +373,16 @@ export default function BookingPage() {
                       <p className="text-xs text-rose-800 leading-relaxed mt-1">
                         Room <strong className="text-rose-950 font-bold bg-rose-200/80 px-2 py-0.5 rounded border border-rose-300">{conflictAlert.item}</strong> was confirmed by another resident just moments before you submitted.
                       </p>
-                      <div className="mt-2.5 inline-flex items-center gap-2 bg-rose-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl shadow-xs">
-                        <span>👉 Please choose another available room from the list below:</span>
+                      <div className="mt-2.5 inline-flex items-center gap-2 bg-rose-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-md">
+                        <span> Choose another available room below.</span>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {rooms.length === 0 ? (
-                  <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 text-center text-slate-500 text-sm">
-                    All rooms for this session have already completed their bookings!
+                  <div className="p-6 bg-slate-50 rounded-lg border border-slate-200 text-center text-slate-500 text-sm">
+                    All rooms in this schedule have been booked.
                   </div>
                 ) : (
                   <div className="space-y-3 pt-2">
@@ -398,7 +396,7 @@ export default function BookingPage() {
                           placeholder="Search room number (e.g. 39/92)..."
                           value={roomSearchQuery}
                           onChange={(e) => setRoomSearchQuery(e.target.value)}
-                          className="w-full bg-white border border-slate-300 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 shadow-sm transition-colors"
+                          className="w-full bg-white border border-slate-300 rounded-md pl-10 pr-4 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-500 transition-colors"
                         />
                       </div>
 
@@ -407,8 +405,8 @@ export default function BookingPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedFloor("all")}
-                            className={`px-3 py-2 text-xs font-semibold rounded-xl border transition-all ${selectedFloor === "all"
-                                ? "bg-teal-600 text-white border-teal-600 font-bold shadow-sm"
+                            className={`px-3 py-2 text-xs font-semibold rounded-md border transition-all ${selectedFloor === "all"
+                                ? "bg-blue-600 text-white border-blue-600 font-bold "
                                 : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                               }`}
                           >
@@ -419,8 +417,8 @@ export default function BookingPage() {
                               key={fl}
                               type="button"
                               onClick={() => setSelectedFloor(fl)}
-                              className={`px-3 py-2 text-xs font-semibold rounded-xl border whitespace-nowrap transition-all ${selectedFloor === fl
-                                  ? "bg-teal-600 text-white border-teal-600 font-bold shadow-sm"
+                              className={`px-3 py-2 text-xs font-semibold rounded-md border whitespace-nowrap transition-all ${selectedFloor === fl
+                                  ? "bg-blue-600 text-white border-blue-600 font-bold "
                                   : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
                                 }`}
                             >
@@ -437,7 +435,7 @@ export default function BookingPage() {
                         id="room-select-dropdown"
                         value={selectedRoomId}
                         onChange={(e) => setSelectedRoomId(e.target.value)}
-                        className="w-full bg-white border border-slate-300 hover:border-slate-400 text-slate-900 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:border-teal-500 transition-all cursor-pointer appearance-none shadow-sm"
+                        className="w-full bg-white border border-slate-300 hover:border-slate-400 text-slate-900 rounded-lg p-4 text-sm font-medium focus:outline-none focus:border-blue-500 transition-all cursor-pointer appearance-none"
                       >
                         <option value="">-- Choose your room from dropdown ({filteredRooms.length} available) --</option>
                         {filteredRooms.map((room) => (
@@ -447,7 +445,7 @@ export default function BookingPage() {
                         ))}
                       </select>
                       <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 text-xs flex items-center gap-1">
-                        <Building className="w-4 h-4 text-teal-600" />
+                        <Building className="w-4 h-4 text-blue-600" />
                         <span>▼</span>
                       </div>
                     </div>
@@ -461,12 +459,12 @@ export default function BookingPage() {
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 font-bold flex items-center justify-center text-sm border border-teal-200 shadow-sm">
+                  <div className="w-8 h-8 rounded-md bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">
                     2
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                      Step 2: Assigned Date & Preferred Time Slot
+                      Choose your time
                     </h2>
                     <p className="text-xs text-slate-500">
                       Cleaning dates are assigned by floor wing. Choose an unbooked time slot on this date.
@@ -477,13 +475,13 @@ export default function BookingPage() {
                 {selectedRoom && (
                   <div className="space-y-4 pt-1">
                     {/* Assigned Date Badge Banner */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 rounded-2xl p-4 shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-blue-200 rounded-lg p-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-teal-100 flex items-center justify-center text-teal-700 shrink-0">
+                        <div className="w-10 h-10 rounded-md bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
                           <Calendar className="w-5 h-5" />
                         </div>
                         <div>
-                          <span className="text-xs font-bold uppercase tracking-wider text-teal-700">
+                          <span className="text-xs font-bold uppercase tracking-wider text-blue-700">
                             Assigned Cleaning Date
                           </span>
                           <p className="text-base sm:text-lg font-bold text-slate-900">
@@ -491,21 +489,21 @@ export default function BookingPage() {
                           </p>
                         </div>
                       </div>
-                      <div className="text-xs text-slate-700 font-medium px-3 py-1 bg-white rounded-lg border border-teal-200 self-start sm:self-auto shadow-sm">
-                        Room: <span className="text-teal-900 font-bold">{selectedRoom.roomNumber}</span>
+                      <div className="text-xs text-slate-700 font-medium px-3 py-1 bg-white rounded-lg border border-blue-200 self-start sm:self-auto">
+                        Room: <span className="text-blue-900 font-bold">{selectedRoom.roomNumber}</span>
                       </div>
                     </div>
 
                     {/* TIME SLOT CONFLICT ALERT BANNER */}
                     {conflictAlert && conflictAlert.type === "SLOT" && (
-                      <div className="p-4.5 bg-rose-50 border-2 border-rose-400 rounded-2xl shadow-md flex items-start gap-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="w-10 h-10 rounded-xl bg-rose-100 border border-rose-300 flex items-center justify-center text-rose-600 shrink-0 mt-0.5">
-                          <AlertTriangle className="w-5 h-5 text-rose-600 animate-pulse" />
+                      <div className="p-4.5 bg-rose-50 border-2 border-rose-400 rounded-lg flex items-start gap-3.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="w-10 h-10 rounded-md bg-rose-100 border border-rose-300 flex items-center justify-center text-rose-600 shrink-0 mt-0.5">
+                          <AlertTriangle className="w-5 h-5 text-rose-600" />
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-black text-rose-950 flex items-center gap-1.5">
-                              ⚠️ Time Slot Conflict: Slot Just Booked by Another Resident!
+                            <h4 className="text-sm font-semibold text-rose-950 flex items-center gap-1.5">
+                               This time has just been booked
                             </h4>
                             <button
                               type="button"
@@ -519,8 +517,8 @@ export default function BookingPage() {
                           <p className="text-xs text-rose-800 leading-relaxed mt-1">
                             The time slot <strong className="text-rose-950 font-bold bg-rose-200/80 px-2 py-0.5 rounded border border-rose-300">{conflictAlert.item}</strong> you selected was confirmed by another resident just moments before you submitted.
                           </p>
-                          <div className="mt-2.5 inline-flex items-center gap-2 bg-rose-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl shadow-xs">
-                            <span>👉 Please choose an alternative available time slot from the updated list below:</span>
+                          <div className="mt-2.5 inline-flex items-center gap-2 bg-rose-600 text-white font-bold text-xs px-3.5 py-1.5 rounded-md">
+                            <span> Choose another available time below.</span>
                           </div>
                         </div>
                       </div>
@@ -534,11 +532,11 @@ export default function BookingPage() {
 
                       {loadingSlots ? (
                         <div className="p-8 flex items-center justify-center gap-2 text-slate-500 text-xs">
-                          <Loader2 className="w-4 h-4 animate-spin text-teal-600" />
+                          <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
                           Loading open time slots...
                         </div>
                       ) : slots.length === 0 ? (
-                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-2xl text-center text-slate-500 text-sm flex items-center justify-center gap-2">
+                        <div className="p-6 bg-slate-50 border border-slate-200 rounded-lg text-center text-slate-500 text-sm flex items-center justify-center gap-2">
                           <AlertTriangle className="w-5 h-5 text-slate-400 shrink-0" />
                           <span>No time slots configured for this date. Please contact administrator.</span>
                         </div>
@@ -554,7 +552,7 @@ export default function BookingPage() {
                                   key={slot.id}
                                   type="button"
                                   disabled
-                                  className="relative p-3.5 rounded-2xl border text-center flex flex-col items-center justify-center gap-1.5 shadow-2xs bg-slate-100/75 border-slate-200 text-slate-400 cursor-not-allowed select-none"
+                                  className="relative p-3.5 rounded-lg border text-center flex flex-col items-center justify-center gap-1.5 bg-slate-100/75 border-slate-200 text-slate-400 cursor-not-allowed select-none"
                                   title="This time slot has already been booked"
                                 >
                                   <div className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -579,17 +577,17 @@ export default function BookingPage() {
                                     setConflictAlert(null);
                                   }
                                 }}
-                                className={`relative p-3.5 rounded-2xl border text-center transition-all duration-200 flex flex-col items-center justify-center gap-1 group shadow-sm ${isSelected
-                                    ? "bg-teal-600 text-white border-teal-600 font-bold shadow-md shadow-teal-600/30 scale-[1.02]"
-                                    : "bg-white hover:bg-teal-50/50 text-slate-800 border-slate-200 hover:border-teal-300"
+                                className={`relative p-3.5 rounded-lg border text-center transition-all duration-200 flex flex-col items-center justify-center gap-1 group  ${isSelected
+                                    ? "bg-blue-600 text-white border-blue-600 font-bold   "
+                                    : "bg-white hover:bg-blue-50/50 text-slate-800 border-slate-200 hover:border-blue-300"
                                   }`}
                               >
                                 <div className="flex items-center gap-1.5 text-xs">
-                                  <Clock className={`w-3.5 h-3.5 ${isSelected ? "text-white" : "text-teal-600"}`} />
+                                  <Clock className={`w-3.5 h-3.5 ${isSelected ? "text-white" : "text-blue-600"}`} />
                                   <span className="font-bold text-sm">{slot.timeSlot}</span>
                                 </div>
                                 <span
-                                  className={`text-[11px] ${isSelected ? "text-teal-100 font-medium" : "text-slate-500"
+                                  className={`text-[11px] ${isSelected ? "text-blue-100 font-medium" : "text-slate-500"
                                     }`}
                                 >
                                   {isSelected ? "Selected" : "Available"}
@@ -610,12 +608,12 @@ export default function BookingPage() {
                   }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-700 font-bold flex items-center justify-center text-sm border border-teal-200 shadow-sm">
+                  <div className="w-8 h-8 rounded-md bg-blue-50 text-blue-700 font-bold flex items-center justify-center text-sm border border-blue-200">
                     3
                   </div>
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 tracking-tight">
-                      Step 3: Staff Assistance Inquiry
+                      Staff assistance Inquiry
                     </h2>
                     <p className="text-xs text-slate-500">
                       Do you require staff assistance / supervision during the cleaning?
@@ -628,14 +626,14 @@ export default function BookingPage() {
                   <div
                     onClick={() => setStaffAssistance(false)}
                     id="assistance-no"
-                    className={`cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3.5 shadow-sm ${!staffAssistance
-                        ? "bg-teal-50/80 border-teal-500 shadow-teal-500/10"
+                    className={`cursor-pointer p-4 rounded-lg border transition-all flex items-start gap-3.5  ${!staffAssistance
+                        ? "bg-blue-50/80 border-blue-500 "
                         : "bg-white border-slate-200 hover:border-slate-300"
                       }`}
                   >
                     <div
                       className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${!staffAssistance
-                          ? "border-teal-600 bg-teal-600 text-white"
+                          ? "border-blue-600 bg-blue-600 text-white"
                           : "border-slate-300 bg-transparent"
                         }`}
                     >
@@ -658,8 +656,8 @@ export default function BookingPage() {
                   <div
                     onClick={() => setStaffAssistance(true)}
                     id="assistance-yes"
-                    className={`cursor-pointer p-4 rounded-2xl border transition-all flex items-start gap-3.5 shadow-sm ${staffAssistance
-                        ? "bg-amber-50 border-amber-500 shadow-amber-500/10"
+                    className={`cursor-pointer p-4 rounded-lg border transition-all flex items-start gap-3.5  ${staffAssistance
+                        ? "bg-amber-50 border-amber-500 "
                         : "bg-white border-slate-200 hover:border-slate-300"
                       }`}
                   >
@@ -689,8 +687,8 @@ export default function BookingPage() {
               {/* STEP 4: SUBMISSION & CONFIRMATION */}
               <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="text-xs text-slate-500 flex items-center gap-2">
-                  <HelpCircle className="w-4 h-4 text-teal-600 shrink-0" />
-                  <span>Your room and slot will be locked immediately upon confirmation.</span>
+                  <HelpCircle className="w-4 h-4 text-blue-600 shrink-0" />
+                  <span>Check your room and time before confirming.</span>
                 </div>
 
                 <button
@@ -698,9 +696,9 @@ export default function BookingPage() {
                   id="confirm-booking-btn"
                   onClick={handleConfirmBooking}
                   disabled={!selectedRoomId || !selectedSlotId || isSubmitting}
-                  className={`w-full sm:w-auto px-8 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2.5 shadow-md ${!selectedRoomId || !selectedSlotId || isSubmitting
+                  className={`w-full sm:w-auto px-8 py-3.5 rounded-lg font-bold text-sm transition-all duration-200 flex items-center justify-center gap-2.5  ${!selectedRoomId || !selectedSlotId || isSubmitting
                       ? "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
-                      : "bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white shadow-teal-600/20 hover:scale-[1.01]"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
                     }`}
                 >
                   {isSubmitting ? (
