@@ -19,7 +19,7 @@ export interface ParseResult {
   schedules: ParsedDateSchedule[];
   totalRooms: number;
   totalDates: number;
-  totalUniqueSlots: number;
+  totalSlots: number;
   ignoredRows: string[];
 }
 
@@ -310,7 +310,7 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
     {
       dateString: string;
       displayDate: string;
-      timeSlotsSet: Set<string>;
+      timeSlots: string[];
       rooms: ParsedRoom[];
     }
   >();
@@ -319,7 +319,7 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
     scheduleMap.set(dc.dateString, {
       dateString: dc.dateString,
       displayDate: dc.displayDate,
-      timeSlotsSet: new Set<string>(),
+      timeSlots: [],
       rooms: [],
     });
   }
@@ -344,8 +344,6 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
       if (parsedTime) {
         assignedDateCol = dc;
         roomTimeSlot = parsedTime;
-        // Register time slot for this date
-        scheduleMap.get(dc.dateString)?.timeSlotsSet.add(parsedTime);
       }
     }
 
@@ -373,6 +371,8 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
     if (assignedDateCol) {
       const schedule = scheduleMap.get(assignedDateCol.dateString);
       if (schedule) {
+        // Preserve one place per valid Excel row, including repeated times.
+        if (roomTimeSlot) schedule.timeSlots.push(roomTimeSlot);
         schedule.rooms.push({
           floor: rawFloor || "1",
           roomNumber: rawRoom,
@@ -388,14 +388,14 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
   }
 
   // Convert map to array: include dates that have either rooms or time slots
-  let totalUniqueSlots = 0;
+  let totalSlots = 0;
   const schedules: ParsedDateSchedule[] = [];
 
   for (const dc of dateColumns) {
     const item = scheduleMap.get(dc.dateString);
-    if (item && (item.rooms.length > 0 || item.timeSlotsSet.size > 0)) {
-      const sortedSlots = Array.from(item.timeSlotsSet).sort((a, b) => a.localeCompare(b));
-      totalUniqueSlots += sortedSlots.length;
+    if (item && (item.rooms.length > 0 || item.timeSlots.length > 0)) {
+      const sortedSlots = [...item.timeSlots].sort((a, b) => a.localeCompare(b));
+      totalSlots += sortedSlots.length;
       schedules.push({
         dateString: item.dateString,
         displayDate: item.displayDate,
@@ -409,12 +409,13 @@ export async function parseExcelBuffer(buffer: Buffer): Promise<ParseResult> {
     schedules,
     totalRooms,
     totalDates: schedules.length,
-    totalUniqueSlots,
+    totalSlots,
     ignoredRows,
   };
 }
 
 export interface ExportRowItem {
+  timeSlotId?: string;
   floor: string;
   roomNumber: string;
   timeSlot: string;
@@ -497,11 +498,12 @@ export async function generateMultiSheetExport(sheets: ExportDateSheet[]): Promi
       emptyRow.values = ["-", "No rooms or bookings recorded for this date", "-", "-", "-", "-"];
       emptyRow.alignment = { vertical: "middle", horizontal: "center" };
     } else {
-      // Count frequency of each confirmed timeSlot on this sheet to detect overlaps
+      // Parallel places at the same time are valid; only sharing one place overlaps.
       const slotCounts: Record<string, number> = {};
       sheet.rows.forEach((r) => {
         if (r.status === "CONFIRMED" && r.timeSlot && r.timeSlot !== "-") {
-          slotCounts[r.timeSlot] = (slotCounts[r.timeSlot] || 0) + 1;
+          const key = r.timeSlotId ?? r.timeSlot;
+          slotCounts[key] = (slotCounts[key] || 0) + 1;
         }
       });
 
@@ -515,7 +517,7 @@ export async function generateMultiSheetExport(sheets: ExportDateSheet[]): Promi
       let rIdx = 4;
       for (const item of sorted) {
         const row = worksheet.getRow(rIdx);
-        const isOverlap = item.status === "CONFIRMED" && (slotCounts[item.timeSlot] || 0) > 1;
+        const isOverlap = item.status === "CONFIRMED" && (slotCounts[item.timeSlotId ?? item.timeSlot] || 0) > 1;
         const displaySlot = isOverlap
           ? `${item.timeSlot} ⚠️ (Overlap / ทับซ้อน)`
           : item.timeSlot || "Pending";

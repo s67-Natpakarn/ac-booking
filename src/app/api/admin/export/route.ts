@@ -42,6 +42,7 @@ export async function GET() {
           : "-";
 
         return {
+          timeSlotId: b?.timeSlotId,
           floor: r.floor,
           roomNumber: r.roomNumber,
           timeSlot,

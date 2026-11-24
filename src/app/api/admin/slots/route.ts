@@ -23,16 +23,6 @@ export async function POST(request: NextRequest) {
 
       const formattedSlot = formatDecimalTime(timeSlot) || timeSlot.trim();
 
-      const existing = await prisma.timeSlot.findFirst({
-        where: { cleaningDateId, timeSlot: formattedSlot },
-      });
-      if (existing) {
-        return NextResponse.json(
-          { error: `Slot ${formattedSlot} already exists for this date.` },
-          { status: 400 }
-        );
-      }
-
       const slot = await prisma.timeSlot.create({
         data: {
           cleaningDateId,

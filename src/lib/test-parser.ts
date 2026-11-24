@@ -60,7 +60,7 @@ async function runTests() {
   console.log("\nParse Result Summary:");
   console.log(`Total dates: ${result.totalDates}`);
   console.log(`Total rooms: ${result.totalRooms}`);
-  console.log(`Total unique slots: ${result.totalUniqueSlots}`);
+  console.log(`Total bookable slots: ${result.totalSlots}`);
   console.log(`Ignored rows count: ${result.ignoredRows.length}`);
   console.log("Ignored rows:", result.ignoredRows);
 

@@ -47,7 +47,8 @@ model TimeSlot {
   bookings       Booking[]
   createdAt      DateTime     @default(now())
 
-  @@unique([cleaningDateId, timeSlot])
+  // Each row is one bookable place; identical times can run in parallel.
+  @@index([cleaningDateId, timeSlot])
 }
 
 model Booking {

@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
         filename: file.name,
         totalDates: parseResult.totalDates,
         totalRooms: parseResult.totalRooms,
-        totalSlots: parseResult.totalUniqueSlots,
+        totalSlots: parseResult.totalSlots,
         ignoredRows: parseResult.ignoredRows,
       },
     });

@@ -66,16 +66,22 @@ export async function POST(request: NextRequest) {
       }
 
       // 3. Mark room as booked
-      await tx.room.update({
-        where: { id: roomId },
+      const roomClaim = await tx.room.updateMany({
+        where: { id: roomId, isBooked: false },
         data: { isBooked: true },
       });
+      if (roomClaim.count !== 1) {
+        throw new BookingConflictError("This room has just been booked. Please select another room.", "ROOM_CONFLICT", room.roomNumber);
+      }
 
       // 4. Mark slot as booked
-      await tx.timeSlot.update({
-        where: { id: timeSlotId },
+      const slotClaim = await tx.timeSlot.updateMany({
+        where: { id: timeSlotId, isBooked: false },
         data: { isBooked: true },
       });
+      if (slotClaim.count !== 1) {
+        throw new BookingConflictError("This place has just been booked. Please select another time slot.", "SLOT_CONFLICT", slot.timeSlot);
+      }
 
       // 5. Create booking record
       const newBooking = await tx.booking.create({

@@ -19,7 +19,7 @@ export async function POST() {
       summary: {
         totalDates: result.totalDates,
         totalRooms: result.totalRooms,
-        totalSlots: result.totalUniqueSlots,
+        totalSlots: result.totalSlots,
         ignoredRows: result.ignoredRows,
       },
     });

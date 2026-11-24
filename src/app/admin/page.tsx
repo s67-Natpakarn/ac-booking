@@ -57,6 +57,7 @@ interface TimeSlotItem {
 
 interface BookingRecord {
   id: string;
+  timeSlotId: string;
   roomNumber: string;
   floor: string;
   dateString: string;
@@ -149,7 +150,7 @@ export default function AdminPage() {
     setSelectedBooking(b);
     setEditStaffAssistance(b.staffAssistance);
     const matchedSlot = slots.find(
-      (s: TimeSlotItem) => s.cleaningDate.dateString === b.dateString && s.timeSlot === b.timeString
+      (s: TimeSlotItem) => s.id === b.timeSlotId
     );
     setEditSlotId(matchedSlot?.id || "");
     setEditBookingModalOpen(true);
@@ -537,11 +538,11 @@ export default function AdminPage() {
     }
   };
 
-  // Overlap Counts: count how many bookings share the same date and time slot
+  // Overlap Counts: count bookings sharing one place, not parallel places at the same time
   const bookingOverlapCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     bookings.forEach((b) => {
-      const key = `${b.dateString}_${b.timeString}`;
+      const key = b.timeSlotId;
       counts[key] = (counts[key] || 0) + 1;
     });
     return counts;
@@ -1024,7 +1025,7 @@ export default function AdminPage() {
                       ) : (
                         filteredBookings.map((b) => {
                           const isOverlap =
-                            (bookingOverlapCounts[`${b.dateString}_${b.timeString}`] || 0) > 1;
+                            (bookingOverlapCounts[b.timeSlotId] || 0) > 1;
 
                           return (
                             <tr
@@ -1531,11 +1532,10 @@ export default function AdminPage() {
                       const otherRooms = bookings.filter(
                         (b) =>
                           b.id !== selectedBooking.id &&
-                          b.dateString === selectedBooking.dateString &&
-                          b.timeString === s.timeSlot
+                          b.timeSlotId === s.id
                       );
                       const isOccupied = otherRooms.length > 0;
-                      const isCurrent = s.timeSlot === selectedBooking.timeString;
+                      const isCurrent = s.id === selectedBooking.timeSlotId;
 
                       let label = s.timeSlot;
                       if (isCurrent) {
@@ -1562,8 +1562,7 @@ export default function AdminPage() {
                   ? bookings.filter(
                       (b) =>
                         b.id !== selectedBooking.id &&
-                        b.dateString === selectedBooking.dateString &&
-                        b.timeString === targetSlot.timeSlot
+                        b.timeSlotId === targetSlot.id
                     )
                   : [];
 
