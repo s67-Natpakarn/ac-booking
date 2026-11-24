@@ -52,13 +52,6 @@ export async function POST(request: NextRequest) {
       if (!slot) {
         throw new Error("The selected time slot could not be found.");
       }
-      if (slot.isBooked) {
-        throw new BookingConflictError(
-          `Time slot ${slot.timeSlot} was just booked by another resident a moment ago. Please select an alternative available time slot below.`,
-          "SLOT_CONFLICT",
-          slot.timeSlot
-        );
-      }
 
       // Ensure slot belongs to the room's assigned date
       if (slot.cleaningDateId !== room.cleaningDateId) {
@@ -74,20 +67,33 @@ export async function POST(request: NextRequest) {
         throw new BookingConflictError("This room has just been booked. Please select another room.", "ROOM_CONFLICT", room.roomNumber);
       }
 
-      // 4. Mark slot as booked
-      const slotClaim = await tx.timeSlot.updateMany({
-        where: { id: timeSlotId, isBooked: false },
-        data: { isBooked: true },
+      // The public choice is a time. Claim any remaining place at that time,
+      // including when another request has just taken the representative ID.
+      const candidates = await tx.timeSlot.findMany({
+        where: { cleaningDateId: room.cleaningDateId, timeSlot: slot.timeSlot, isBooked: false },
+        orderBy: { id: "asc" },
+        select: { id: true },
       });
-      if (slotClaim.count !== 1) {
-        throw new BookingConflictError("This place has just been booked. Please select another time slot.", "SLOT_CONFLICT", slot.timeSlot);
+      let claimedSlotId: string | null = null;
+      for (const candidate of candidates) {
+        const claim = await tx.timeSlot.updateMany({
+          where: { id: candidate.id, isBooked: false },
+          data: { isBooked: true },
+        });
+        if (claim.count === 1) {
+          claimedSlotId = candidate.id;
+          break;
+        }
+      }
+      if (!claimedSlotId) {
+        throw new BookingConflictError("This time is fully booked. Please select another time.", "SLOT_CONFLICT", slot.timeSlot);
       }
 
       // 5. Create booking record
       const newBooking = await tx.booking.create({
         data: {
           roomId: room.id,
-          timeSlotId: slot.id,
+          timeSlotId: claimedSlotId,
           roomNumber: room.roomNumber,
           floor: room.floor,
           dateString: room.cleaningDate.dateString,
@@ -108,6 +114,7 @@ export async function POST(request: NextRequest) {
       success: true,
       booking: {
         id: booking.id,
+        timeSlotId: booking.timeSlotId,
         roomNumber: booking.roomNumber,
         floor: booking.floor,
         dateString: booking.dateString,

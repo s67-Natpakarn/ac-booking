@@ -18,6 +18,25 @@ Module._resolveFilename = function (request, ...args) {
   return resolve.call(this, request.startsWith('@/') ? path.join(root, 'src', request.slice(2)) : request, ...args);
 };
 const { parseExcelBuffer, generateMultiSheetExport } = require('../src/lib/excel-parser.ts');
+const { groupTimeSlots } = require('../src/lib/time-slot-groups.ts');
+
+function testGroups() {
+  const slots = ['09:30', '09:30', '12:00', '12:00'].map((timeSlot, index) => ({ id: String(index), timeSlot, isBooked: false }));
+  assert.equal(groupTimeSlots(slots).length, 2);
+  assert.equal(groupTimeSlots(slots)[0].remaining, 2);
+  slots[0].isBooked = true;
+  assert.equal(groupTimeSlots(slots)[0].remaining, 1);
+  assert.equal(groupTimeSlots(slots)[0].availableId, '1');
+  slots[1].isBooked = true;
+  const full = groupTimeSlots(slots)[0];
+  assert.equal(full.remaining, 0);
+  assert.equal(full.capacity, 2);
+  assert.equal(full.availableId, null);
+  assert.equal(groupTimeSlots(slots).length, 2, 'Full choices stay visible');
+  assert.equal(groupTimeSlots(slots)[1].remaining, 2);
+  assert.deepEqual(groupTimeSlots([]), []);
+  console.log('PASS: one choice per time, capacity counts down, and full times remain visible with no available place.');
+}
 
 async function testExcel() {
   const workbook = new ExcelJS.Workbook();
@@ -87,10 +106,11 @@ async function testDatabase() {
     const responses = await Promise.all([
       book(date.rooms[0].id, date.timeSlots[0].id),
       book(date.rooms[1].id, date.timeSlots[0].id),
+      book(date.rooms[2].id, date.timeSlots[0].id),
     ]);
-    assert.deepEqual(responses.map(response => response.status).sort(), [200, 409]);
+    assert.deepEqual(responses.map(response => response.status).sort(), [200, 200, 409]);
     assert.equal(responses.find(response => response.status === 409).data.conflictType, 'SLOT_CONFLICT');
-    assert.equal((await book(date.rooms[2].id, date.timeSlots[1].id)).status, 200);
+    assert.equal(new Set(responses.filter(response => response.status === 200).map(response => response.data.booking.timeSlotId)).size, 2);
     assert.equal(await prisma.booking.count({ where: { timeSlotId: { in: date.timeSlots.slice(0, 2).map(slot => slot.id) } } }), 2);
     assert.equal((await book(date.rooms[3].id, date.timeSlots[0].id)).status, 409);
     assert.equal((await prisma.room.findUnique({ where: { id: date.rooms[3].id } })).isBooked, false);
@@ -102,7 +122,7 @@ async function testDatabase() {
     assert.deepEqual(sameRoom.map(response => response.status).sort(), [200, 409]);
     assert.equal(sameRoom.find(response => response.status === 409).data.conflictType, 'ROOM_CONFLICT');
     assert.equal(await prisma.timeSlot.count({ where: { cleaningDateId: dateId, timeSlot: '12:00', isBooked: true } }), 1);
-    console.log('PASS: four parallel places persist; duplicate times book independently; concurrent requests cannot double-book a place or room; failed bookings roll back.');
+    console.log('PASS: three concurrent requests for one time fill exactly two places; full capacity rejects further bookings; room conflicts roll back without consuming capacity.');
   } finally {
     if (dateId) await prisma.cleaningDate.delete({ where: { id: dateId } });
     await prisma.$disconnect();
@@ -110,6 +130,7 @@ async function testDatabase() {
 }
 
 (async () => {
+  testGroups();
   await testExcel();
   if (process.argv.includes('--database')) await testDatabase();
 })().catch(error => {

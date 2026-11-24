@@ -5,6 +5,7 @@ import Header from "@/components/Header";
 import RoomCombobox from "@/components/RoomCombobox";
 import BookingSkeleton, { TimeSlotsSkeleton } from "@/components/BookingSkeleton";
 import { inferSlotDuration } from "@/lib/booking-calendar";
+import { groupTimeSlots } from "@/lib/time-slot-groups";
 import { hasTouchInput } from "@/lib/device";
 import BookingReceiptModal from "@/components/BookingReceiptModal";
 import { useToast } from "@/components/ToastContext";
@@ -166,6 +167,8 @@ export default function BookingPage() {
     return rooms.filter((room) => selectedFloor === "all" || room.floor === selectedFloor);
   }, [rooms, selectedFloor]);
 
+  const slotGroups = useMemo(() => groupTimeSlots(slots), [slots]);
+
   // Fetch slots for a date
   const fetchSlotsForDate = useCallback(
     async (dateId: string) => {
@@ -182,7 +185,7 @@ export default function BookingPage() {
 
         if (!Array.isArray(data.slots)) throw new Error("Invalid time slot response");
         setSlots(data.slots);
-        if (data.slots.length > 0) setSlotPlaceholderCount(data.slots.length);
+        if (data.slots.length > 0) setSlotPlaceholderCount(groupTimeSlots(data.slots).length);
         setLoadedSlotsDateId(dateId);
       } catch (err) {
         if (requestId !== slotRequestId.current) return;
@@ -249,7 +252,7 @@ export default function BookingPage() {
               item: slotName,
             });
 
-            // Automatically re-fetch slots so the conflicting slot turns into "Booked" immediately in UI
+            // Refresh capacity so fully booked times become disabled immediately.
             if (selectedRoom) {
               await fetchSlotsForDate(selectedRoom.cleaningDateId);
             }
@@ -292,7 +295,7 @@ export default function BookingPage() {
       // Immediate reactive update: remove booked room and booked slot from state
       setRooms((prev) => prev.filter((r) => r.id !== selectedRoomId));
       setSlots((prev) =>
-        prev.map((s) => (s.id === selectedSlotId ? { ...s, isBooked: true } : s))
+        prev.map((s) => (s.id === data.booking.timeSlotId ? { ...s, isBooked: true } : s))
       );
       setSelectedRoomId("");
       setSelectedSlotId("");
@@ -561,51 +564,37 @@ export default function BookingPage() {
                         </div>
                       ) : (
                         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                          {slots.map((slot) => {
-                            const isSelected = selectedSlotId === slot.id;
-                            const isBooked = slot.isBooked;
-
-                            if (isBooked) {
-                              return (
-                                <button
-                                  key={slot.id}
-                                  type="button"
-                                  disabled
-                                  className="relative min-h-11 px-2 py-2 rounded-md border text-center flex flex-wrap items-center justify-center gap-x-1.5 gap-y-0.5 bg-slate-100/75 border-slate-200 text-slate-400 cursor-not-allowed select-none"
-                                  title="This time slot has already been booked"
-                                >
-                                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                                    <Clock className="w-3.5 h-3.5 text-slate-400" />
-                                    <span className="font-bold text-sm text-slate-400">{slot.timeSlot}</span>
-                                  </div>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-200 text-slate-500">
-                                    Booked
-                                  </span>
-                                </button>
-                              );
-                            }
-
+                          {slotGroups.map((group) => {
+                            const isSelected = group.slotIds.includes(selectedSlotId);
+                            const isFull = group.remaining === 0;
                             return (
                               <button
-                                key={slot.id}
+                                key={group.timeSlot}
                                 type="button"
-                                id={`slot-btn-${slot.id}`}
+                                id={`slot-btn-${group.slotIds[0]}`}
+                                disabled={isFull}
                                 onClick={() => {
-                                  setSelectedSlotId(slot.id);
-                                  if (conflictAlert?.type === "SLOT") {
-                                    setConflictAlert(null);
-                                  }
+                                  if (!group.availableId) return;
+                                  setSelectedSlotId(group.availableId);
+                                  if (conflictAlert?.type === "SLOT") setConflictAlert(null);
                                 }}
                                 aria-pressed={isSelected}
-                                className={`relative min-h-11 px-2 py-2 rounded-md border text-center transition-colors flex items-center justify-center gap-1.5 group ${isSelected
-                                    ? "bg-blue-600 text-white border-blue-600 font-bold   "
-                                    : "bg-white hover:bg-blue-50/50 text-slate-800 border-slate-200 hover:border-blue-300"
-                                  }`}
+                                aria-label={`${group.timeSlot}, ${group.remaining} of ${group.capacity} places available`}
+                                className={`min-h-11 px-2 py-2 rounded-md border text-center transition-colors flex flex-col items-center justify-center gap-0.5 ${
+                                  isFull
+                                    ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed"
+                                    : isSelected
+                                      ? "bg-blue-600 text-white border-blue-600"
+                                      : "bg-white hover:bg-blue-50 text-slate-800 border-slate-200 hover:border-blue-300"
+                                }`}
                               >
-                                <div className="flex items-center gap-1.5 text-xs">
-                                  <Clock className={`w-3.5 h-3.5 ${isSelected ? "text-white" : "text-blue-600"}`} />
-                                  <span className="font-bold text-sm">{slot.timeSlot}</span>
-                                </div>
+                                <span className="flex items-center gap-1.5 text-sm font-semibold">
+                                  <Clock className="w-3.5 h-3.5" />
+                                  {group.timeSlot}
+                                </span>
+                                <span className={`text-[11px] ${isSelected ? "text-blue-100" : "text-slate-500"}`}>
+                                  {isFull ? "Fully booked" : `${group.remaining} / ${group.capacity} available`}
+                                </span>
                               </button>
                             );
                           })}
